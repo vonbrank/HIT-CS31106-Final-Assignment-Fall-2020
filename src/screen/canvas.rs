@@ -2,6 +2,8 @@ use std::{cell::RefCell, sync::Mutex};
 
 use lazy_static::lazy_static;
 
+use crate::ui::view::viewable::Viewable;
+
 use super::coordinate::Coordinate2D;
 
 pub struct Canvas {
@@ -11,7 +13,7 @@ pub struct Canvas {
 }
 
 impl Canvas {
-    fn new(width: usize, height: usize) -> Canvas {
+    pub fn new(width: usize, height: usize) -> Canvas {
         let char_matrix: Vec<Vec<char>> = vec![vec![' '; width]; height];
         Canvas {
             width,
@@ -35,7 +37,14 @@ impl Canvas {
         self.char_matrix.get_mut(x).unwrap()[y] = value;
     }
 
-    pub fn draw(&self) {
+    pub fn render_view<T: Viewable>(&mut self, view_able: &mut T) {
+        view_able.draw(|coordinate, value| {
+            println!("current coordinate: ({}, {})", coordinate.0, coordinate.1);
+            self.set_char_in_matrix(coordinate, value)
+        });
+    }
+
+    pub fn draw_on_screen(&self) {
         self.char_matrix.iter().for_each(|line| {
             line.iter().for_each(|c| {
                 print!("{}", c);
@@ -45,7 +54,7 @@ impl Canvas {
     }
 }
 
-lazy_static! {
-    pub static ref GLOBAL_CANVAS: Mutex<RefCell<Canvas>> =
-        Mutex::new(RefCell::new(Canvas::new(60, 20)));
-}
+// lazy_static! {
+//     pub static ref GLOBAL_CANVAS: Mutex<RefCell<Canvas>> =
+//         Mutex::new(RefCell::new(Canvas::new(60, 20)));
+// }

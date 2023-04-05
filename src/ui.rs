@@ -1,2 +1,2 @@
 pub mod view;
-mod component;
+pub mod component;

@@ -1,15 +1,14 @@
-mod renderer;
+mod screen;
 mod ui;
-use crate::renderer::canvas::GLOBAL_CANVAS;
-use crate::ui::view::view_base::ViewBase;
-
-use crate::ui::view::View;
+use crate::screen::canvas::Canvas;
+use crate::ui::component::Block::BlockView;
 
 fn main() {
-    println!("Hello, world!");
-    let view = View {};
-    view.draw();
-    let global_canvas = GLOBAL_CANVAS.lock().unwrap();
-    let global_canvas = global_canvas.borrow();
-    global_canvas.draw();
+    let mut root_view = BlockView::new(60, 20);
+
+    let mut canvas = Canvas::new(60, 20);
+
+    canvas.render_view(&mut root_view);
+
+    canvas.draw_on_screen();
 }

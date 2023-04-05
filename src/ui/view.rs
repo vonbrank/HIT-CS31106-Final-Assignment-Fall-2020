@@ -1,6 +1,10 @@
-pub mod view_base;
-use view_base::ViewBase;
+pub mod viewable;
+use viewable::Viewable;
 
 pub struct View {}
 
-impl ViewBase for View {}
+impl Viewable for View {
+    fn draw<F: FnMut(crate::screen::coordinate::Coordinate2D, char) -> ()>(&self, mut set_char: F) {
+        
+    }
+}
