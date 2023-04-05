@@ -1,1 +1,0 @@
-pub struct Coordinate2D(pub usize, pub usize);
