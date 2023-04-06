@@ -64,10 +64,10 @@ impl Canvas {
                 let mut inner_constraint =
                     Self::calculate_inner_constraint(&constraint, &view_node.box_model_attribute);
 
-                println!(
-                    "rendering layout node, type = {:?}, constraint = {:?}, inner constraint = {:?}",
-                    layout_type, constraint, inner_constraint
-                );
+                // println!(
+                //     "rendering layout node, type = {:?}, constraint = {:?}, inner constraint = {:?}",
+                //     layout_type, constraint, inner_constraint
+                // );
 
                 view_node.child_nodes.iter().for_each(|childe_node| {
                     if inner_constraint.1 .0 > inner_constraint.0 .0
@@ -84,7 +84,10 @@ impl Canvas {
                                 current_occupy_area
                             }
                             LayoutType::Row => {
-                                self.render_node_with_constraint(childe_node, &inner_constraint)
+                                let current_occupy_area = self
+                                    .render_node_with_constraint(childe_node, &inner_constraint);
+                                inner_constraint.0 .1 = current_occupy_area.1 .1;
+                                current_occupy_area
                             }
                         };
 
@@ -92,26 +95,26 @@ impl Canvas {
                             max(node_max_occupy_area.1 .0, current_occupy_area.1 .0);
                         node_max_occupy_area.1 .1 =
                             max(node_max_occupy_area.1 .1, current_occupy_area.1 .1);
-                        println!(
-                            "rendering child node, inner_constraint = {:?}, occupy_area = {:?}",
-                            inner_constraint, current_occupy_area
-                        );
+                        // println!(
+                        //     "rendering child node, inner_constraint = {:?}, occupy_area = {:?}",
+                        //     inner_constraint, current_occupy_area
+                        // );
                     }
                 });
             }
             ViewNodeType::ContentType(content_type) => match content_type {
                 viewnode::ContentType::Text(text) => {
-                    println!(
-                        "redering text node, text = {}, constaint = {:?}, ",
-                        text, constraint,
-                    );
+                    // println!(
+                    //     "redering text node, text = {}, constaint = {:?}, ",
+                    //     text, constraint,
+                    // );
                     for (index, c) in text.chars().enumerate() {
                         let x = *left_top_x;
                         let y = left_top_y + index;
 
                         if y < *bottom_right_y {
                             node_max_occupy_area.1 .0 = node_max_occupy_area.0 .0 + 1;
-                            node_max_occupy_area.1 .1 = node_max_occupy_area.0 .1 + index;
+                            node_max_occupy_area.1 .1 = node_max_occupy_area.0 .1 + index + 1;
                             self.char_matrix[x][y] = c;
                         }
                     }

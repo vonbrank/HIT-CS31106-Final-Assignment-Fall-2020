@@ -17,11 +17,12 @@ impl ViewNode {
     pub fn row_layout() -> ViewNodeType {
         ViewNodeType::LayoutType(LayoutType::Row)
     }
-    pub fn text_node(text: &String) -> ViewNodeType {
+    pub fn text_node(text: String) -> ViewNodeType {
         ViewNodeType::ContentType(ContentType::Text(text.clone()))
     }
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct BoxModelAttribute {
     pub padding: Option<Padding>,
     pub margin: Option<Margin>,
@@ -67,7 +68,7 @@ impl BoxModelAttribute {
         }
     }
 }
-
+#[derive(Debug, Copy, Clone)]
 pub struct BoxModelQuadruple {
     pub left: usize,
     pub top: usize,

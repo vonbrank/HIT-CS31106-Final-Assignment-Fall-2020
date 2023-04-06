@@ -7,6 +7,10 @@ use screen::{
         ViewNodeType,
     },
 };
+use ui::{
+    components::{divider::Divider, text::Text, Component},
+    layout::{column::Column, row::Row},
+};
 
 mod screen;
 mod ui;
@@ -14,46 +18,41 @@ mod ui;
 fn main() {
     let mut canvas = Canvas::new(60, 20);
 
-    let text_view = Rc::new(ViewNode {
-        box_model_attribute: BoxModelAttribute::with_none(),
-        node_type: ViewNode::text_node(
-            &"It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. ".to_string()
-        ),
-        child_nodes: vec![],
-    });
-    let text_view1 = Rc::new(ViewNode {
-        box_model_attribute: BoxModelAttribute::with_none(),
-        node_type: ViewNode::text_node(
-            &"It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. ".to_string()
-        ),
-        child_nodes: vec![],
-    });
+    let title = Text::new("It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. ".to_string());
 
-    let divider = Rc::new(ViewNode {
-        box_model_attribute: BoxModelAttribute::new(
-            35,
+    let mut top_bar = Column::new(vec![Box::new(title)]);
+    top_bar.resize(33, 1).padding(Padding::new(1, 0, 1, 0));
+
+    let divider = Divider::new(33, ui::components::divider::DividerDirection::Horizontal);
+
+    let content_text = Text::new("It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. ".to_string());
+
+    let mut text_a_box = Row::new(vec![Box::new(Text::new("text-a".to_string()))]);
+    text_a_box
+        .resize("text-a".len() + 1, 1)
+        .padding(Padding::new(0, 0, 1, 0));
+
+    let mut row = Row::new(vec![
+        Box::new(text_a_box),
+        Box::new(Divider::new(
             1,
-            Padding::new(0, 0, 0, 0),
-            Margin::new(0, 0, 0, 0),
-            Border::new(0, 1, 0, 0),
-        ),
-        node_type: ViewNode::box_layout(),
-        child_nodes: vec![],
-    });
+            ui::components::divider::DividerDirection::Vertical,
+        )),
+        Box::new(Text::new("text-b".to_string())),
+    ]);
+    row.resize(31, 5);
 
-    let mut box_view = ViewNode {
-        box_model_attribute: BoxModelAttribute::with_width_and_height(35, 15),
-        node_type: ViewNode::column_layout(),
-        child_nodes: vec![
-            Rc::clone(&text_view),
-            Rc::clone(&divider),
-            Rc::clone(&text_view1),
-        ],
-    };
-    box_view.box_model_attribute.border = Some(Border::new(1, 1, 1, 1));
-    box_view.box_model_attribute.padding = Some(Padding::new(1, 0, 1, 1));
+    let mut container = Column::new(vec![Box::new(content_text), Box::new(row)]);
+    container.resize(33, 10).padding(Padding::new(1, 0, 1, 0));
 
-    let root_view_node = RootViewNode(box_view);
+    let mut app = Column::new(vec![
+        Box::new(top_bar),
+        Box::new(divider),
+        Box::new(container),
+    ]);
+    app.border(Border::new(1, 1, 1, 1)).resize(35, 15);
+
+    let root_view_node = RootViewNode(app.to_view_node());
 
     canvas.render_view_node_tree(&root_view_node);
 
