@@ -1,14 +1,11 @@
 use std::error::Error;
 
-use crossterm::{
-    event::{Event, KeyCode, KeyEvent, KeyEventKind},
-    terminal,
-};
+use crossterm::event::{self, KeyCode, KeyEvent, KeyEventKind};
 use tokio::sync::mpsc;
 use tokio::task;
 
 use crate::{
-    model::Model,
+    model::{Model, Page},
     screen::canvas::{Canvas, RootViewNode},
 };
 pub struct Controller {
@@ -39,47 +36,44 @@ impl Controller {
     }
 
     pub async fn run(&mut self) -> Result<(), Box<dyn Error>> {
-        terminal::enable_raw_mode()?;
-        let (sender, mut receiver) = mpsc::unbounded_channel::<KeyCode>();
+        let (tx, mut rx) = mpsc::unbounded_channel();
 
-        // let (shut_down_sender, shut_down_receiver) = channel::<u32>();
-
-        let sender_handle = task::spawn(async move {
-            while let Ok(key_event) = crossterm::event::read() {
-                match key_event {
-                    Event::Key(KeyEvent {
-                        kind: KeyEventKind::Press,
-                        code,
-                        ..
-                    }) => {
-                        if let Err(_) = sender.send(code) {
-                            break;
-                        }
+        task::spawn(async move {
+            while let Ok(event) = event::read() {
+                if let event::Event::Key(key_event) = event {
+                    if let Err(_) = tx.send(key_event) {
+                        break;
                     }
-                    _ => {}
-                };
+                }
             }
         });
 
         loop {
-            if let Some(key_code) = receiver.recv().await {
-                if let KeyCode::Esc = key_code {
-                    terminal::disable_raw_mode()?;
-                    break;
+            if let Some(key_event) = rx.recv().await {
+                match (key_event, self.model.current_page) {
+                    (
+                        KeyEvent {
+                            code: KeyCode::Esc, ..
+                        },
+                        Page::HomeEntry,
+                    ) => {
+                        break;
+                    }
+                    _ => {}
                 }
-                self.control_home_page(key_code);
-                self.render();
-            } else {
-                break;
+                match key_event {
+                    KeyEvent {
+                        kind: KeyEventKind::Press,
+                        code,
+                        ..
+                    } => {
+                        self.control_home_page(code);
+                        self.render();
+                    }
+                    _ => {}
+                };
             }
         }
-
-        drop(receiver);
-
-        println!("before abort...");
-
-        sender_handle.abort();
-        sender_handle.await?;
 
         Ok(())
     }

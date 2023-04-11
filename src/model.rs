@@ -1,8 +1,3 @@
-use std::cell::RefCell;
-
-use lazy_static::lazy_static;
-use tokio::sync::Mutex;
-
 use crate::ui::page::homeentry::HomeEntryState;
 
 pub struct Model {
@@ -27,6 +22,7 @@ pub struct State {
     pub home_entry_state: HomeEntryState,
 }
 
+#[derive(Copy, Clone)]
 pub enum Page {
     HomeEntry,
     Settings,
