@@ -13,7 +13,7 @@ impl Text {
 }
 
 impl Component for Text {
-    fn to_view_node(&self) -> ViewNode {
+    fn to_view_mut(&mut self) -> ViewNode {
         ViewNode {
             box_model_attribute: BoxModelAttribute::with_none(),
             node_type: ViewNode::text_node(self.string.clone()),

@@ -14,7 +14,7 @@ impl Divider {
 }
 
 impl Component for Divider {
-    fn to_view_node(&self) -> ViewNode {
+    fn to_view_mut(&mut self) -> ViewNode {
         match self.direction {
             DividerDirection::Horizontal => ViewNode {
                 box_model_attribute: BoxModelAttribute::new(

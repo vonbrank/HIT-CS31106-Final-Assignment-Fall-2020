@@ -23,14 +23,9 @@ fn main() {
     {
         let model = MODEL.lock().unwrap();
 
-        let root_view_node = RootViewNode(
-            model
-                .borrow()
-                .state
-                .home_entry_state
-                .render()
-                .to_view_node(),
-        );
+        let view_node = model.borrow().state.home_entry_state.render().to_view_mut();
+
+        let root_view_node = RootViewNode(view_node);
 
         canvas.render_view_node_tree(&root_view_node);
 

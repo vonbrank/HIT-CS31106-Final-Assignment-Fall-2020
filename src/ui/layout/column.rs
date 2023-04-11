@@ -37,12 +37,14 @@ impl Column {
 }
 
 impl Component for Column {
-    fn to_view_node(&self) -> ViewNode {
+    fn to_view_mut(&mut self) -> ViewNode {
         let mut child_nodes = Vec::new();
 
-        self.child_components.iter().for_each(|child_component| {
-            child_nodes.push(Rc::new(child_component.to_view_node()));
-        });
+        self.child_components
+            .iter_mut()
+            .for_each(|child_component| {
+                child_nodes.push(Rc::new(child_component.to_view_mut()));
+            });
 
         ViewNode {
             box_model_attribute: self.box_model_attribute,

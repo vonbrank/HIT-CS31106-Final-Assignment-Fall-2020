@@ -28,9 +28,9 @@ impl HomeEntryState {
 
     fn hightlight_option_label_if_selected(option_label: String, selected_label: String) -> String {
         if option_label == selected_label {
-            format!("+{:^19}+", option_label)
+            format!("+{:<19}+", option_label)
         } else {
-            format!(" {:^19} ", option_label)
+            format!(" {:<19} ", option_label)
         }
     }
 

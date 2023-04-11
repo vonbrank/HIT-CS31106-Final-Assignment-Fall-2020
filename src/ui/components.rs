@@ -1,8 +1,8 @@
 use crate::screen::viewnode::ViewNode;
 
-pub mod text;
 pub mod divider;
+pub mod text;
 
 pub trait Component {
-    fn to_view_node(&self) -> ViewNode;
+    fn to_view_mut(&mut self) -> ViewNode;
 }

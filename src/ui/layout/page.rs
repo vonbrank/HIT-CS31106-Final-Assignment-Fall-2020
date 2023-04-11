@@ -12,20 +12,20 @@ use super::column::Column;
 
 pub struct Page {
     pub title: String,
-    pub content: RefCell<Option<Box<dyn Component>>>,
+    pub content: Option<Box<dyn Component>>,
 }
 
 impl Page {
     pub fn new(title: String, content: Box<dyn Component>) -> Page {
         Page {
             title,
-            content: RefCell::new(Some(content)),
+            content: Some(content),
         }
     }
 }
 
 impl Component for Page {
-    fn to_view_node(&self) -> crate::screen::viewnode::ViewNode {
+    fn to_view_mut(&mut self) -> crate::screen::viewnode::ViewNode {
         let title = Text::new(self.title.clone());
 
         let mut top_bar = Column::new(vec![Box::new(title)]);
@@ -36,12 +36,13 @@ impl Component for Page {
         let mut child_components: Vec<Box<dyn Component>> =
             vec![Box::new(top_bar), Box::new(divider)];
 
-        if let Some(content) = self.content.take() {
+        if let Some(_) = &self.content {
+            let content = self.content.take().unwrap();
             child_components.push(content);
         }
 
         let mut app = Column::new(child_components);
         app.border(Border::new(1, 1, 1, 1)).resize(60, 15);
-        app.to_view_node()
+        app.to_view_mut()
     }
 }
