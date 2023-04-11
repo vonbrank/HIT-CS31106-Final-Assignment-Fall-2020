@@ -7,13 +7,20 @@ use crate::{
 };
 
 pub struct HomeEntryState {
-    pub currentOption: HomeEntryOption,
+    pub current_option_index: usize,
+    pub option_list: Vec<HomeEntryOption>,
 }
 
 impl HomeEntryState {
     pub fn new() -> HomeEntryState {
         HomeEntryState {
-            currentOption: HomeEntryOption::CreateNewContactsBook,
+            current_option_index: 0,
+            option_list: vec![
+                HomeEntryOption::CreateNewContactsBook,
+                HomeEntryOption::ContactsBookList,
+                HomeEntryOption::Settings,
+                HomeEntryOption::About,
+            ],
         }
     }
 
@@ -35,30 +42,36 @@ impl HomeEntryState {
     }
 
     pub fn render(&self) -> Box<dyn Component> {
-        let selected_label = Self::get_option_label(self.currentOption);
+        let selected_label = Self::get_option_label(self.option_list[self.current_option_index]);
 
-        let mut container = Column::new(vec![
-            Box::new(Text::new(Self::hightlight_option_label_if_selected(
-                Self::get_option_label(HomeEntryOption::CreateNewContactsBook),
+        let mut option_component_list: Vec<Box<dyn Component>> = vec![];
+
+        for option_item in self.option_list.iter() {
+            let item_component = Box::new(Text::new(Self::hightlight_option_label_if_selected(
+                Self::get_option_label(*option_item),
                 selected_label.clone(),
-            ))),
-            Box::new(Text::new(Self::hightlight_option_label_if_selected(
-                Self::get_option_label(HomeEntryOption::ContactsBookList),
-                selected_label.clone(),
-            ))),
-            Box::new(Text::new(Self::hightlight_option_label_if_selected(
-                Self::get_option_label(HomeEntryOption::Settings),
-                selected_label.clone(),
-            ))),
-            Box::new(Text::new(Self::hightlight_option_label_if_selected(
-                Self::get_option_label(HomeEntryOption::About),
-                selected_label.clone(),
-            ))),
-        ]);
+            )));
+            option_component_list.push(item_component);
+        }
+
+        let mut container = Column::new(option_component_list);
         container.resize(58, 5).padding(Padding::new(0, 0, 1, 0));
 
         let page = Page::new("Contactify".to_string(), Box::new(container));
         Box::new(page)
+    }
+
+    pub fn to_next_item(&mut self) {
+        let max_index = self.option_list.len() - 1;
+        if self.current_option_index + 1 <= max_index {
+            self.current_option_index += 1;
+        }
+    }
+
+    pub fn to_previous_item(&mut self) {
+        if self.current_option_index >= 1 {
+            self.current_option_index -= 1;
+        }
     }
 }
 

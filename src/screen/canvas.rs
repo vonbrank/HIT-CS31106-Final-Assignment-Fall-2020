@@ -1,8 +1,15 @@
 use std::cmp::{max, min};
 
+use crossterm::{
+    execute,
+    terminal::{Clear, ClearType},
+};
+
 use crate::screen::viewnode::LayoutType;
 
 use super::viewnode::{self, Border, BoxModelAttribute, ViewNode, ViewNodeType};
+
+use std::io::stdout;
 
 pub struct Canvas {
     width: usize,
@@ -28,6 +35,7 @@ impl Canvas {
     }
 
     pub fn draw_on_screen(&self) {
+        print!("{}[2J", 27 as char);
         self.char_matrix.iter().for_each(|line| {
             line.iter().for_each(|c| {
                 print!("{}", c);
@@ -37,6 +45,7 @@ impl Canvas {
     }
 
     pub fn render_view_node_tree(&mut self, root: &RootViewNode) {
+        Self::clear_screen();
         self.render_node_with_constraint(
             &root.0,
             &RenderConstraint(Coordinate2D(0, 0), Coordinate2D(self.height, self.width)),
@@ -256,6 +265,11 @@ impl Canvas {
                 },
             ),
         )
+    }
+
+    fn clear_screen() {
+        let mut stdout = stdout();
+        execute!(stdout, Clear(ClearType::All)).unwrap();
     }
 }
 

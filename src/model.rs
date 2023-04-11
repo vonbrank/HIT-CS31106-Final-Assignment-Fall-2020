@@ -1,6 +1,7 @@
-use std::{cell::RefCell, sync::Mutex};
+use std::cell::RefCell;
 
 use lazy_static::lazy_static;
+use tokio::sync::Mutex;
 
 use crate::ui::page::homeentry::HomeEntryState;
 
@@ -20,10 +21,6 @@ impl Model {
             settings: Settings {},
         }
     }
-}
-
-lazy_static! {
-    pub static ref MODEL: Mutex<RefCell<Model>> = Mutex::new(RefCell::new(Model::new()));
 }
 
 pub struct State {
