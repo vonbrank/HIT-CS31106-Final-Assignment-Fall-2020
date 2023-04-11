@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 lazy_static = "1.4.0"
+tokio = { version = "1.27.0", features = ["full"] }
+crossterm = "0.26.0"
+crossbeam = "0.8"
