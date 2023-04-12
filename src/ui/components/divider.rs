@@ -5,11 +5,16 @@ use super::Component;
 pub struct Divider {
     length: usize,
     direction: DividerDirection,
+    variant: DividerVariant,
 }
 
 impl Divider {
-    pub fn new(length: usize, direction: DividerDirection) -> Divider {
-        Divider { length, direction }
+    pub fn new(length: usize, direction: DividerDirection, variant: DividerVariant) -> Divider {
+        Divider {
+            length,
+            direction,
+            variant,
+        }
     }
 }
 
@@ -45,4 +50,9 @@ impl Component for Divider {
 pub enum DividerDirection {
     Horizontal,
     Vertical,
+}
+
+pub enum DividerVariant {
+    Full,
+    Dotted,
 }

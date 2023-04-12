@@ -1,4 +1,5 @@
-use crate::ui::page::homeentry::HomeEntryState;
+use crate::ui::page::{contactlist::ContactListPageState, homeentry::HomeEntryState};
+pub mod contactmodel;
 
 pub struct Model {
     pub current_page: Page,
@@ -12,6 +13,7 @@ impl Model {
             current_page: Page::HomeEntry,
             state: State {
                 home_entry_state: HomeEntryState::new(),
+                contact_list_page_state: ContactListPageState::new("".to_string(), vec![], 0, 5),
             },
             settings: Settings {},
         }
@@ -20,6 +22,7 @@ impl Model {
 
 pub struct State {
     pub home_entry_state: HomeEntryState,
+    pub contact_list_page_state: ContactListPageState,
 }
 
 #[derive(Copy, Clone)]

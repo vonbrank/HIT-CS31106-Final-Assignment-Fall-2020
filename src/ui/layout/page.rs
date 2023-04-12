@@ -31,7 +31,11 @@ impl Component for Page {
         let mut top_bar = Column::new(vec![Box::new(title)]);
         top_bar.resize(58, 1).padding(Padding::new(1, 0, 1, 0));
 
-        let divider = Divider::new(58, ui::components::divider::DividerDirection::Horizontal);
+        let divider = Divider::new(
+            58,
+            ui::components::divider::DividerDirection::Horizontal,
+            ui::components::divider::DividerVariant::Full,
+        );
 
         let mut child_components: Vec<Box<dyn Component>> =
             vec![Box::new(top_bar), Box::new(divider)];
