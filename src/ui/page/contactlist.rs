@@ -68,10 +68,6 @@ impl ContactListPageState {
             ))));
         }
 
-        // contact_display_list.into_iter().for_each(|contact| {
-
-        // });
-
         let mut container = Column::new(option_component_list);
         container.resize(58, 5).padding(Padding::new(0, 0, 1, 0));
 

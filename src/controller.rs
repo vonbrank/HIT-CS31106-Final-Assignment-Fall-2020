@@ -76,6 +76,7 @@ impl Controller {
                 match (key_event, self.model.current_page) {
                     (
                         KeyEvent {
+                            kind: KeyEventKind::Press,
                             code: KeyCode::Esc, ..
                         },
                         Page::HomeEntry,

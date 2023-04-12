@@ -38,6 +38,12 @@ impl Canvas {
     }
 
     pub fn render_view_node_tree(&mut self, root: &RootViewNode) {
+        self.char_matrix.iter_mut().for_each(|row| {
+            for i in 0..row.len() {
+                row[i] = ' ';
+            }
+        });
+
         self.render_node_with_constraint(
             &root.0,
             &RenderConstraint(Coordinate2D(0, 0), Coordinate2D(self.height, self.width)),
