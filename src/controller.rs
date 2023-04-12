@@ -25,7 +25,7 @@ impl Controller {
     pub async fn init(&mut self) {
         let contact_list_page_state = &mut self.model.state.contact_list_page_state;
         contact_list_page_state.name = "Contact List 1".to_string();
-        contact_list_page_state.contact_list = vec![
+        contact_list_page_state.set_contact_list(vec![
             Contact {
                 name: "Alice".to_string(),
                 telephone: "123456".to_string(),
@@ -34,7 +34,7 @@ impl Controller {
                 name: "Bob".to_string(),
                 telephone: "567890".to_string(),
             },
-        ];
+        ]);
 
         self.render();
     }
@@ -77,7 +77,8 @@ impl Controller {
                     (
                         KeyEvent {
                             kind: KeyEventKind::Press,
-                            code: KeyCode::Esc, ..
+                            code: KeyCode::Esc,
+                            ..
                         },
                         Page::HomeEntry,
                     ) => {
