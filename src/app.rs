@@ -35,7 +35,7 @@ impl App {
 
         let controller = self.controller.as_mut().unwrap();
 
-        controller.render();
+        controller.render().await;
 
         loop {
             controller.update().await;

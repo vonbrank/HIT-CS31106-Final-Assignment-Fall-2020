@@ -8,7 +8,7 @@ use crate::view::{Action, PageTrait, PageType};
 pub struct Controller {
     receiver: UnboundedReceiver<KeyEvent>,
     current_page_type: PageType,
-    view_table: HashMap<PageType, Box<dyn PageTrait>>,
+    page_cache: HashMap<PageType, Box<dyn PageTrait>>,
 }
 
 impl Controller {
@@ -16,34 +16,35 @@ impl Controller {
         Controller {
             receiver,
             current_page_type: PageType::HomeEntry,
-            view_table: HashMap::new(),
+            page_cache: HashMap::new(),
         }
     }
 
     pub async fn update(&mut self) {
         self.handle_input().await;
 
-        self.render();
+        self.render().await;
     }
 
     async fn handle_input(&mut self) -> Action {
         if let Some(key_event) = self.receiver.recv().await {
-            let current_page_view = self.view_table.get_mut(&self.current_page_type).unwrap();
-            current_page_view.handle_input(key_event)
+            let current_page_view = self.page_cache.get_mut(&self.current_page_type).unwrap();
+            current_page_view.handle_input(key_event).await
         } else {
             Action::None
         }
     }
 
-    pub fn render(&mut self) {
+    pub async fn render(&mut self) {
         print!("\x1B[2J\x1B[1;1H");
-        let current_page_view = self.view_table.get(&self.current_page_type);
+
+        let current_page_view = self.page_cache.get(&self.current_page_type);
         if let Some(page_view) = current_page_view {
             page_view.render();
         } else {
-            let page_view = self.current_page_type.create_page();
+            let page_view = self.current_page_type.create_page().await;
             page_view.render();
-            self.view_table
+            self.page_cache
                 .insert(self.current_page_type.clone(), page_view);
         }
     }
