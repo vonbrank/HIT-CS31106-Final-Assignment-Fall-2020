@@ -1,6 +1,7 @@
 mod app;
 mod controller;
 mod view;
+mod model;
 
 use std::error::Error;
 

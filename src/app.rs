@@ -3,7 +3,7 @@ use tokio::task;
 
 use crossterm::event::{self};
 
-use crate::controller::Controller;
+use crate::{controller::Controller, view::PageContent};
 
 pub struct App {
     controller: Option<Controller>,

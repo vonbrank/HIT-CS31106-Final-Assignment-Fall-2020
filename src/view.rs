@@ -3,6 +3,8 @@ use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 use lazy_static::lazy_static;
 use tokio::sync::Mutex;
 
+use crate::model::Model;
+
 #[derive(PartialEq, Eq, Hash, Clone)]
 pub enum PageType {
     HomeEntry,
@@ -18,6 +20,22 @@ impl PageType {
     pub async fn create_page(&self) -> Box<dyn PageTrait> {
         match self {
             PageType::HomeEntry => Box::new(HomeEntry::new().await),
+            _ => Box::new(EmptyPage {}),
+        }
+    }
+
+    pub async fn create_page_from_model(&self, model: &Model) -> Box<dyn PageTrait> {
+        match self {
+            PageType::HomeEntry => self.create_page().await,
+            PageType::PhoneBookList => {
+                let phone_book_list: Vec<String> = model
+                    .phone_books
+                    .iter()
+                    .map(|item| item.name.clone())
+                    .collect();
+                let phone_book_list_page = PhoneBookListPage::new(phone_book_list);
+                Box::new(phone_book_list_page)
+            }
             _ => Box::new(EmptyPage {}),
         }
     }
@@ -75,6 +93,7 @@ impl PageContent {
     }
 }
 
+#[derive(Clone, Copy)]
 pub enum HomeEntryAction {
     NewPhoneBook,
     LoadPhoneBooks,
@@ -181,6 +200,19 @@ impl PageTrait for HomeEntry {
                     self.current_select_index += 1;
                 }
             }
+            KeyEvent {
+                code: KeyCode::Enter,
+                kind: KeyEventKind::Press,
+                ..
+            } => {
+                let home_entry_action = HOME_ENTRY_ITEMS
+                    .lock()
+                    .await
+                    .get(self.current_select_index)
+                    .unwrap()
+                    .1;
+                action = Action::HomeEntry(home_entry_action);
+            }
             _ => {}
         }
 
@@ -189,6 +221,77 @@ impl PageTrait for HomeEntry {
         action
     }
 
+    fn render(&self) {
+        self.page_content.render();
+    }
+}
+
+pub struct PhoneBookListPage {
+    page_content: PageContent,
+    current_select_index: usize,
+    phone_book_list: Vec<String>,
+}
+
+impl PhoneBookListPage {
+    pub fn new(phone_book_list: Vec<String>) -> PhoneBookListPage {
+        let mut phone_book_list_page = PhoneBookListPage {
+            page_content: PageContent::new(),
+            current_select_index: 0,
+            phone_book_list,
+        };
+
+        phone_book_list_page.refresh_content();
+
+        phone_book_list_page
+    }
+
+    fn refresh_content(&mut self) {
+        let mut page_content = PageContent::new();
+        page_content.add_element(UiElement::Text("Phone Book List".to_string()));
+        page_content.add_element(UiElement::Text("----------".to_string()));
+        page_content.add_element(UiElement::TextList(
+            self.phone_book_list.clone(),
+            self.current_select_index,
+        ));
+        self.page_content = page_content;
+    }
+}
+#[async_trait]
+impl PageTrait for PhoneBookListPage {
+    async fn handle_input(&mut self, key_event: KeyEvent) -> Action {
+        let mut action = Action::None;
+
+        match key_event {
+            KeyEvent {
+                code: KeyCode::Up,
+                kind: KeyEventKind::Press,
+                ..
+            } => {
+                if self.current_select_index <= 0 {
+                    self.current_select_index = self.phone_book_list.len() - 1;
+                } else {
+                    self.current_select_index -= 1;
+                }
+            }
+            KeyEvent {
+                code: KeyCode::Down,
+                kind: KeyEventKind::Press,
+                ..
+            } => {
+                if self.current_select_index >= self.phone_book_list.len() - 1 {
+                    self.current_select_index = 0;
+                } else {
+                    self.current_select_index += 1;
+                }
+            }
+
+            _ => {}
+        }
+
+        self.refresh_content();
+
+        action
+    }
     fn render(&self) {
         self.page_content.render();
     }
