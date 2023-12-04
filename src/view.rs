@@ -1,6 +1,7 @@
 mod contact_list;
 pub mod home_entry;
 mod phone_book_list;
+mod settings;
 
 use std::usize;
 
@@ -12,6 +13,7 @@ use self::{
     contact_list::ContactListPage,
     home_entry::{HomeEntry, HomeEntryAction},
     phone_book_list::PhoneBookListPage,
+    settings::SettingsPage,
 };
 
 #[derive(PartialEq, Eq, Hash, Clone)]
@@ -55,6 +57,7 @@ impl PageType {
                     ContactListPage::new(phone_book_name.clone(), phone_book.contacts.clone());
                 Box::new(contact_list_page)
             }
+            PageType::Settings => Box::new(SettingsPage::new(model.settings.clone())),
             _ => Box::new(EmptyPage {}),
         }
     }

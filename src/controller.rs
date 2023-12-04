@@ -36,9 +36,10 @@ impl Controller {
             }
             Action::Exit => match self.current_page_type {
                 PageType::HomeEntry => update_result = UpdateResult::Exit,
-                PageType::PhoneBookList | PageType::PhoneBook(_) | PageType::NewPhoneBook => {
-                    self.current_page_type = PageType::HomeEntry
-                }
+                PageType::PhoneBookList
+                | PageType::PhoneBook(_)
+                | PageType::NewPhoneBook
+                | PageType::Settings => self.current_page_type = PageType::HomeEntry,
                 _ => {}
             },
             _ => {}

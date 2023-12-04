@@ -38,7 +38,7 @@ impl HomeEntry {
 
     fn refresh_content(&mut self) {
         self.page_content = PageContent::from_list(
-            "Phone Book List".to_string(),
+            "Contactify".to_string(),
             self.home_entry_items
                 .iter()
                 .map(|item| item.0.clone())
@@ -80,9 +80,9 @@ impl PageTrait for HomeEntry {
                             HomeEntryAction::LoadPhoneBooks => {
                                 Action::Navigate(super::PageType::PhoneBookList)
                             }
-                            // HomeEntryAction::Settings => {
-                            //     Action::Navigate(super::PageType::Settings)
-                            // }
+                            HomeEntryAction::Settings => {
+                                Action::Navigate(super::PageType::Settings)
+                            }
                             // HomeEntryAction::About => Action::Navigate(super::PageType::About),
                             HomeEntryAction::Exit => Action::Exit,
                             _ => Action::None,
