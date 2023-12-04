@@ -73,6 +73,10 @@ impl Controller {
                 .insert(self.current_page_type.clone(), page_view);
         }
     }
+
+    pub fn close(&mut self) {
+        self.receiver.close();
+    }
 }
 
 pub enum UpdateResult {

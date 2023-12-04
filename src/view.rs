@@ -1,3 +1,5 @@
+use std::usize;
+
 use async_trait::async_trait;
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 use lazy_static::lazy_static;
@@ -57,6 +59,13 @@ impl PageContent {
         PageContent {
             ui_elements: vec![],
         }
+    }
+    pub fn from_list(name: String, list: Vec<String>, selected_index: usize) -> PageContent {
+        let mut page_content = PageContent::new();
+        page_content.add_element(UiElement::Text(name));
+        page_content.add_element(UiElement::Text("----------".to_string()));
+        page_content.add_element(UiElement::TextList(list, selected_index));
+        page_content
     }
     pub fn add_element(&mut self, element: UiElement) {
         self.ui_elements.push(element);
@@ -123,6 +132,47 @@ impl PageTrait for EmptyPage {
     fn render(&self) {}
 }
 
+fn handle_list_scroll<T>(
+    key_event: KeyEvent,
+    target_list: &Vec<T>,
+    seleced_index: &mut usize,
+) -> bool {
+    let mut res = false;
+
+    match key_event {
+        KeyEvent {
+            kind: KeyEventKind::Press,
+            ..
+        } => match key_event {
+            KeyEvent {
+                code: KeyCode::Up, ..
+            } => {
+                if *seleced_index <= 0 {
+                    *seleced_index = target_list.len() - 1;
+                } else {
+                    *seleced_index -= 1;
+                }
+                res = true;
+            }
+            KeyEvent {
+                code: KeyCode::Down,
+                ..
+            } => {
+                if *seleced_index >= target_list.len() - 1 {
+                    *seleced_index = 0;
+                } else {
+                    *seleced_index += 1;
+                }
+                res = true;
+            }
+            _ => {}
+        },
+        _ => {}
+    }
+
+    res
+}
+
 lazy_static! {
     static ref HOME_ENTRY_ITEMS: Mutex<Vec<(String, HomeEntryAction)>> = Mutex::new(vec![
         ("New Phone Book".to_string(), HomeEntryAction::NewPhoneBook),
@@ -156,17 +206,14 @@ impl HomeEntry {
     }
 
     fn refresh_content(&mut self) {
-        let mut page_content = PageContent::new();
-        page_content.add_element(UiElement::Text("Contactify".to_string()));
-        page_content.add_element(UiElement::Text("----------".to_string()));
-        page_content.add_element(UiElement::TextList(
+        self.page_content = PageContent::from_list(
+            "Phone Book List".to_string(),
             self.home_entry_items
                 .iter()
                 .map(|item| item.0.clone())
                 .collect(),
             self.current_select_index,
-        ));
-        self.page_content = page_content;
+        );
     }
 }
 
@@ -174,52 +221,39 @@ impl PageTrait for HomeEntry {
     fn handle_input(&mut self, key_event: KeyEvent) -> Action {
         let mut action = Action::None;
 
-        match key_event {
-            KeyEvent {
-                kind: KeyEventKind::Press,
-                ..
-            } => match key_event {
+        if handle_list_scroll(
+            key_event,
+            &self.home_entry_items,
+            &mut self.current_select_index,
+        ) {
+            self.refresh_content();
+        } else {
+            match key_event {
                 KeyEvent {
-                    code: KeyCode::Up, ..
-                } => {
-                    if self.current_select_index <= 0 {
-                        self.current_select_index = self.home_entry_items.len() - 1;
-                    } else {
-                        self.current_select_index -= 1;
-                    }
-                }
-                KeyEvent {
-                    code: KeyCode::Down,
+                    kind: KeyEventKind::Press,
                     ..
-                } => {
-                    if self.current_select_index >= self.home_entry_items.len() - 1 {
-                        self.current_select_index = 0;
-                    } else {
-                        self.current_select_index += 1;
+                } => match key_event {
+                    KeyEvent {
+                        code: KeyCode::Enter,
+                        ..
+                    } => {
+                        let home_entry_action = self
+                            .home_entry_items
+                            .get(self.current_select_index)
+                            .unwrap()
+                            .1;
+                        action = Action::HomeEntry(home_entry_action);
                     }
-                }
-                KeyEvent {
-                    code: KeyCode::Enter,
-                    ..
-                } => {
-                    let home_entry_action = self
-                        .home_entry_items
-                        .get(self.current_select_index)
-                        .unwrap()
-                        .1;
-                    action = Action::HomeEntry(home_entry_action);
-                }
-                KeyEvent {
-                    code: KeyCode::Esc, ..
-                } => {
-                    action = Action::Exit;
-                }
+                    KeyEvent {
+                        code: KeyCode::Esc, ..
+                    } => {
+                        action = Action::Exit;
+                    }
+                    _ => {}
+                },
                 _ => {}
-            },
-            _ => {}
+            }
         }
-
-        self.refresh_content();
 
         action
     }
@@ -249,14 +283,11 @@ impl PhoneBookListPage {
     }
 
     fn refresh_content(&mut self) {
-        let mut page_content = PageContent::new();
-        page_content.add_element(UiElement::Text("Phone Book List".to_string()));
-        page_content.add_element(UiElement::Text("----------".to_string()));
-        page_content.add_element(UiElement::TextList(
+        self.page_content = PageContent::from_list(
+            "Phone Book List".to_string(),
             self.phone_book_list.clone(),
             self.current_select_index,
-        ));
-        self.page_content = page_content;
+        );
     }
 }
 #[async_trait]
@@ -264,41 +295,28 @@ impl PageTrait for PhoneBookListPage {
     fn handle_input(&mut self, key_event: KeyEvent) -> Action {
         let mut action = Action::None;
 
-        match key_event {
-            KeyEvent {
-                kind: KeyEventKind::Press,
-                ..
-            } => match key_event {
+        if handle_list_scroll(
+            key_event,
+            &self.phone_book_list,
+            &mut self.current_select_index,
+        ) {
+            self.refresh_content();
+        } else {
+            match key_event {
                 KeyEvent {
-                    code: KeyCode::Up, ..
-                } => {
-                    if self.current_select_index <= 0 {
-                        self.current_select_index = self.phone_book_list.len() - 1;
-                    } else {
-                        self.current_select_index -= 1;
-                    }
-                }
-                KeyEvent {
-                    code: KeyCode::Down,
+                    kind: KeyEventKind::Press,
                     ..
-                } => {
-                    if self.current_select_index >= self.phone_book_list.len() - 1 {
-                        self.current_select_index = 0;
-                    } else {
-                        self.current_select_index += 1;
+                } => match key_event {
+                    KeyEvent {
+                        code: KeyCode::Esc, ..
+                    } => {
+                        action = Action::Exit;
                     }
-                }
-                KeyEvent {
-                    code: KeyCode::Esc, ..
-                } => {
-                    action = Action::Exit;
-                }
+                    _ => {}
+                },
                 _ => {}
-            },
-            _ => {}
+            }
         }
-
-        self.refresh_content();
 
         action
     }

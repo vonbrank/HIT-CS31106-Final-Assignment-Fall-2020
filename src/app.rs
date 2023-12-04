@@ -17,7 +17,7 @@ impl App {
         App { controller: None }
     }
 
-    pub fn init(&mut self) {
+    fn init(&mut self) {
         let (tx, mut rx) = mpsc::unbounded_channel();
 
         task::spawn(async move {
@@ -28,6 +28,7 @@ impl App {
                     }
                 }
             }
+            println!("Receiver has been closed.");
         });
 
         self.controller = Some(Controller::new(rx));
@@ -47,5 +48,7 @@ impl App {
                 break;
             }
         }
+
+        controller.close();
     }
 }
