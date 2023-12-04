@@ -3,7 +3,10 @@ use tokio::task;
 
 use crossterm::event::{self};
 
-use crate::{controller::Controller, view::PageContent};
+use crate::{
+    controller::{Controller, UpdateResult},
+    view::PageContent,
+};
 
 pub struct App {
     controller: Option<Controller>,
@@ -38,7 +41,11 @@ impl App {
         controller.render().await;
 
         loop {
-            controller.update().await;
+            let update_result = controller.update().await;
+
+            if matches!(update_result, UpdateResult::Exit) {
+                break;
+            }
         }
     }
 }

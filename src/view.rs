@@ -108,17 +108,15 @@ pub enum Action {
     None,
 }
 
-#[async_trait]
 pub trait PageTrait {
-    async fn handle_input(&mut self, key_event: KeyEvent) -> Action;
+    fn handle_input(&mut self, key_event: KeyEvent) -> Action;
     fn render(&self);
 }
 
 pub struct EmptyPage {}
 
-#[async_trait]
 impl PageTrait for EmptyPage {
-    async fn handle_input(&mut self, key_event: KeyEvent) -> Action {
+    fn handle_input(&mut self, key_event: KeyEvent) -> Action {
         Action::None
     }
 
@@ -141,6 +139,7 @@ lazy_static! {
 pub struct HomeEntry {
     page_content: PageContent,
     current_select_index: usize,
+    home_entry_items: Vec<(String, HomeEntryAction)>,
 }
 
 impl HomeEntry {
@@ -148,21 +147,20 @@ impl HomeEntry {
         let mut home_entry = HomeEntry {
             page_content: PageContent::new(),
             current_select_index: 0,
+            home_entry_items: HOME_ENTRY_ITEMS.lock().await.clone(),
         };
 
-        home_entry.refresh_content().await;
+        home_entry.refresh_content();
 
         home_entry
     }
 
-    async fn refresh_content(&mut self) {
+    fn refresh_content(&mut self) {
         let mut page_content = PageContent::new();
         page_content.add_element(UiElement::Text("Contactify".to_string()));
         page_content.add_element(UiElement::Text("----------".to_string()));
         page_content.add_element(UiElement::TextList(
-            HOME_ENTRY_ITEMS
-                .lock()
-                .await
+            self.home_entry_items
                 .iter()
                 .map(|item| item.0.clone())
                 .collect(),
@@ -172,51 +170,56 @@ impl HomeEntry {
     }
 }
 
-#[async_trait]
 impl PageTrait for HomeEntry {
-    async fn handle_input(&mut self, key_event: KeyEvent) -> Action {
+    fn handle_input(&mut self, key_event: KeyEvent) -> Action {
         let mut action = Action::None;
 
         match key_event {
             KeyEvent {
-                code: KeyCode::Up,
                 kind: KeyEventKind::Press,
                 ..
-            } => {
-                if self.current_select_index <= 0 {
-                    self.current_select_index = HOME_ENTRY_ITEMS.lock().await.len() - 1;
-                } else {
-                    self.current_select_index -= 1;
+            } => match key_event {
+                KeyEvent {
+                    code: KeyCode::Up, ..
+                } => {
+                    if self.current_select_index <= 0 {
+                        self.current_select_index = self.home_entry_items.len() - 1;
+                    } else {
+                        self.current_select_index -= 1;
+                    }
                 }
-            }
-            KeyEvent {
-                code: KeyCode::Down,
-                kind: KeyEventKind::Press,
-                ..
-            } => {
-                if self.current_select_index >= HOME_ENTRY_ITEMS.lock().await.len() - 1 {
-                    self.current_select_index = 0;
-                } else {
-                    self.current_select_index += 1;
+                KeyEvent {
+                    code: KeyCode::Down,
+                    ..
+                } => {
+                    if self.current_select_index >= self.home_entry_items.len() - 1 {
+                        self.current_select_index = 0;
+                    } else {
+                        self.current_select_index += 1;
+                    }
                 }
-            }
-            KeyEvent {
-                code: KeyCode::Enter,
-                kind: KeyEventKind::Press,
-                ..
-            } => {
-                let home_entry_action = HOME_ENTRY_ITEMS
-                    .lock()
-                    .await
-                    .get(self.current_select_index)
-                    .unwrap()
-                    .1;
-                action = Action::HomeEntry(home_entry_action);
-            }
+                KeyEvent {
+                    code: KeyCode::Enter,
+                    ..
+                } => {
+                    let home_entry_action = self
+                        .home_entry_items
+                        .get(self.current_select_index)
+                        .unwrap()
+                        .1;
+                    action = Action::HomeEntry(home_entry_action);
+                }
+                KeyEvent {
+                    code: KeyCode::Esc, ..
+                } => {
+                    action = Action::Exit;
+                }
+                _ => {}
+            },
             _ => {}
         }
 
-        self.refresh_content().await;
+        self.refresh_content();
 
         action
     }
@@ -258,33 +261,40 @@ impl PhoneBookListPage {
 }
 #[async_trait]
 impl PageTrait for PhoneBookListPage {
-    async fn handle_input(&mut self, key_event: KeyEvent) -> Action {
+    fn handle_input(&mut self, key_event: KeyEvent) -> Action {
         let mut action = Action::None;
 
         match key_event {
             KeyEvent {
-                code: KeyCode::Up,
                 kind: KeyEventKind::Press,
                 ..
-            } => {
-                if self.current_select_index <= 0 {
-                    self.current_select_index = self.phone_book_list.len() - 1;
-                } else {
-                    self.current_select_index -= 1;
+            } => match key_event {
+                KeyEvent {
+                    code: KeyCode::Up, ..
+                } => {
+                    if self.current_select_index <= 0 {
+                        self.current_select_index = self.phone_book_list.len() - 1;
+                    } else {
+                        self.current_select_index -= 1;
+                    }
                 }
-            }
-            KeyEvent {
-                code: KeyCode::Down,
-                kind: KeyEventKind::Press,
-                ..
-            } => {
-                if self.current_select_index >= self.phone_book_list.len() - 1 {
-                    self.current_select_index = 0;
-                } else {
-                    self.current_select_index += 1;
+                KeyEvent {
+                    code: KeyCode::Down,
+                    ..
+                } => {
+                    if self.current_select_index >= self.phone_book_list.len() - 1 {
+                        self.current_select_index = 0;
+                    } else {
+                        self.current_select_index += 1;
+                    }
                 }
-            }
-
+                KeyEvent {
+                    code: KeyCode::Esc, ..
+                } => {
+                    action = Action::Exit;
+                }
+                _ => {}
+            },
             _ => {}
         }
 

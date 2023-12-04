@@ -5,7 +5,7 @@ use tokio::sync::mpsc::UnboundedReceiver;
 
 use crate::{
     model::Model,
-    view::{Action, HomeEntryAction, PageTrait, PageType},
+    view::{Action, HomeEntry, HomeEntryAction, PageTrait, PageType},
 };
 
 pub struct Controller {
@@ -25,7 +25,9 @@ impl Controller {
         }
     }
 
-    pub async fn update(&mut self) {
+    pub async fn update(&mut self) -> UpdateResult {
+        let mut update_result = UpdateResult::Continue;
+
         let action = self.handle_input().await;
 
         match action {
@@ -33,16 +35,23 @@ impl Controller {
                 HomeEntryAction::LoadPhoneBooks => self.current_page_type = PageType::PhoneBookList,
                 _ => {}
             },
+            Action::Exit => match self.current_page_type {
+                PageType::HomeEntry => update_result = UpdateResult::Exit,
+                PageType::PhoneBookList => self.current_page_type = PageType::HomeEntry,
+                _ => {}
+            },
             _ => {}
         }
 
         self.render().await;
+
+        update_result
     }
 
     async fn handle_input(&mut self) -> Action {
         if let Some(key_event) = self.receiver.recv().await {
             let current_page_view = self.page_cache.get_mut(&self.current_page_type).unwrap();
-            current_page_view.handle_input(key_event).await
+            current_page_view.handle_input(key_event)
         } else {
             Action::None
         }
@@ -64,4 +73,9 @@ impl Controller {
                 .insert(self.current_page_type.clone(), page_view);
         }
     }
+}
+
+pub enum UpdateResult {
+    Continue,
+    Exit,
 }
