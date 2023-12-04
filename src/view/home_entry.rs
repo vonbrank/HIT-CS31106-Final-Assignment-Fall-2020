@@ -2,7 +2,7 @@ use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 use lazy_static::lazy_static;
 use tokio::sync::Mutex;
 
-use super::{handle_list_scroll, Action, PageContent, PageTrait};
+use super::{handle_vertical_scroll, Action, PageContent, PageTrait};
 
 lazy_static! {
     static ref HOME_ENTRY_ITEMS: Mutex<Vec<(String, HomeEntryAction)>> = Mutex::new(vec![
@@ -52,7 +52,7 @@ impl PageTrait for HomeEntry {
     fn handle_input(&mut self, key_event: KeyEvent) -> Action {
         let mut action = Action::None;
 
-        if handle_list_scroll(
+        if handle_vertical_scroll(
             key_event,
             &self.home_entry_items,
             &mut self.current_select_index,

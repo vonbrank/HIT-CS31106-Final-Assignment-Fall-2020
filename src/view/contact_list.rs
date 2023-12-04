@@ -2,7 +2,7 @@ use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 
 use crate::model::Contact;
 
-use super::{handle_list_scroll, Action, PageContent, PageTrait};
+use super::{handle_vertical_scroll, Action, PageContent, PageTrait};
 
 pub struct ContactListPage {
     page_content: PageContent,
@@ -41,7 +41,7 @@ impl PageTrait for ContactListPage {
     fn handle_input(&mut self, key_event: KeyEvent) -> Action {
         let mut action = Action::None;
 
-        if handle_list_scroll(
+        if handle_vertical_scroll(
             key_event,
             &self.contact_list,
             &mut self.current_select_index,

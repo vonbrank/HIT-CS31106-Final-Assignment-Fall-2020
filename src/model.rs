@@ -114,88 +114,227 @@ impl Display for DeveloperModeOption {
 //     DeveloperMode(String, i32),
 // }
 #[derive(Clone)]
-struct SettingOption<T: Display> {
+struct SettingItemState<T: Display + Clone> {
     name: String,
     current_selected_item_index: usize,
     items: Vec<T>,
 }
 
-impl<T: Display> SettingOption<T> {
-    pub fn with_one_item(name: String, option: T) -> SettingOption<T> {
-        SettingOption {
+impl<T: Display + Clone> SettingItemState<T> {
+    pub fn with_one_item(name: String, option: T) -> SettingItemState<T> {
+        SettingItemState {
             current_selected_item_index: 0,
             items: vec![option],
             name,
         }
     }
 
-    pub fn get_value_string(&self) -> String {
-        format!(
-            "{}",
-            self.items.get(self.current_selected_item_index).unwrap()
-        )
+    pub fn new(name: String, options: Vec<T>) -> SettingItemState<T> {
+        SettingItemState {
+            current_selected_item_index: 0,
+            items: options,
+            name,
+        }
     }
+
+    pub fn value(&self) -> T {
+        let index = self.current_selected_item_index;
+        self.items.get(index).unwrap().clone()
+    }
+
+    // pub fn value_string(&self) -> String {
+    //     format!(
+    //         "{}",
+    //         self.items.get(self.current_selected_item_index).unwrap()
+    //     )
+    // }
 }
 
 #[derive(Clone)]
-pub struct Settings {
-    resolution: SettingOption<ResolutionOption>,
-    refresh_rate: SettingOption<RefreshRateOption>,
-    v_sync: SettingOption<VSyncOption>,
-    language: SettingOption<LanguageOption>,
-    developer_mode: SettingOption<DeveloperModeOption>,
+pub struct SettingsState {
+    resolution: SettingItemState<ResolutionOption>,
+    refresh_rate: SettingItemState<RefreshRateOption>,
+    v_sync: SettingItemState<VSyncOption>,
+    language: SettingItemState<LanguageOption>,
+    developer_mode: SettingItemState<DeveloperModeOption>,
 }
 
-impl Settings {
-    pub fn new() -> Settings {
-        Settings {
-            resolution: SettingOption::with_one_item(
+impl SettingsState {
+    pub fn default() -> SettingsState {
+        SettingsState {
+            resolution: SettingItemState::new(
                 "Resolution".to_string(),
-                ResolutionOption::_40_10,
+                vec![
+                    ResolutionOption::_40_10,
+                    ResolutionOption::_60_15,
+                    ResolutionOption::_80_20,
+                ],
             ),
-            refresh_rate: SettingOption::with_one_item(
+            refresh_rate: SettingItemState::new(
                 "Refresh Rate".to_string(),
-                RefreshRateOption::_15,
+                vec![
+                    RefreshRateOption::_15,
+                    RefreshRateOption::_30,
+                    RefreshRateOption::_60,
+                ],
             ),
-            v_sync: SettingOption::with_one_item("V-Sync".to_string(), VSyncOption::OFF),
-            language: SettingOption::with_one_item("Language".to_string(), LanguageOption::English),
-            developer_mode: SettingOption::with_one_item(
+            v_sync: SettingItemState::new(
+                "V-Sync".to_string(),
+                vec![VSyncOption::OFF, VSyncOption::ON],
+            ),
+            language: SettingItemState::new(
+                "Language".to_string(),
+                vec![LanguageOption::English, LanguageOption::Chinese],
+            ),
+            developer_mode: SettingItemState::new(
                 "Developer Mode".to_string(),
-                DeveloperModeOption::OFF,
+                vec![DeveloperModeOption::OFF, DeveloperModeOption::ON],
             ),
         }
     }
 
-    pub fn setting_list(&self) -> Vec<(String, String)> {
+    pub fn update_item_select(&mut self, name: String, new_select_item_index: usize) {
+        match name.as_str() {
+            "Resolution" => {
+                if new_select_item_index < self.resolution.items.len() {
+                    self.resolution.current_selected_item_index = new_select_item_index;
+                }
+            }
+            "Refresh Rate" => {
+                if new_select_item_index < self.refresh_rate.items.len() {
+                    self.refresh_rate.current_selected_item_index = new_select_item_index;
+                }
+            }
+            "V-Sync" => {
+                if new_select_item_index < self.v_sync.items.len() {
+                    self.v_sync.current_selected_item_index = new_select_item_index;
+                }
+            }
+            "Language" => {
+                if new_select_item_index < self.language.items.len() {
+                    self.language.current_selected_item_index = new_select_item_index;
+                }
+            }
+            "Developer Mode" => {
+                if new_select_item_index < self.developer_mode.items.len() {
+                    self.developer_mode.current_selected_item_index = new_select_item_index;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    pub fn string_item_state_entries(&self) -> Vec<(String, usize, Vec<String>)> {
         vec![
             (
                 self.resolution.name.clone(),
-                self.resolution.get_value_string(),
+                self.resolution.current_selected_item_index,
+                self.resolution
+                    .items
+                    .iter()
+                    .map(|item| item.to_string())
+                    .collect(),
             ),
             (
                 self.refresh_rate.name.clone(),
-                self.refresh_rate.get_value_string(),
+                self.refresh_rate.current_selected_item_index,
+                self.refresh_rate
+                    .items
+                    .iter()
+                    .map(|item| item.to_string())
+                    .collect(),
             ),
-            (self.v_sync.name.clone(), self.v_sync.get_value_string()),
-            (self.language.name.clone(), self.language.get_value_string()),
+            (
+                self.v_sync.name.clone(),
+                self.v_sync.current_selected_item_index,
+                self.v_sync
+                    .items
+                    .iter()
+                    .map(|item| item.to_string())
+                    .collect(),
+            ),
+            (
+                self.language.name.clone(),
+                self.language.current_selected_item_index,
+                self.language
+                    .items
+                    .iter()
+                    .map(|item| item.to_string())
+                    .collect(),
+            ),
             (
                 self.developer_mode.name.clone(),
-                self.developer_mode.get_value_string(),
+                self.developer_mode.current_selected_item_index,
+                self.developer_mode
+                    .items
+                    .iter()
+                    .map(|item| item.to_string())
+                    .collect(),
+            ),
+        ]
+    }
+
+    pub fn string_entries(&self) -> Vec<(String, String)> {
+        vec![
+            (
+                self.resolution.name.clone(),
+                self.resolution.value().to_string(),
+            ),
+            (
+                self.refresh_rate.name.clone(),
+                self.refresh_rate.value().to_string(),
+            ),
+            (self.v_sync.name.clone(), self.v_sync.value().to_string()),
+            (
+                self.language.name.clone(),
+                self.language.value().to_string(),
+            ),
+            (
+                self.developer_mode.name.clone(),
+                self.developer_mode.value().to_string(),
             ),
         ]
     }
 }
 
+pub struct SettingConfig {
+    resolution: ResolutionOption,
+    refresh_rate: RefreshRateOption,
+    v_sync: VSyncOption,
+    language: LanguageOption,
+    developer_mode: DeveloperModeOption,
+}
+
+impl SettingConfig {
+    pub fn from_state(state: SettingsState) -> SettingConfig {
+        SettingConfig {
+            resolution: state.resolution.value(),
+            refresh_rate: state.refresh_rate.value(),
+            v_sync: state.v_sync.value(),
+            language: state.language.value(),
+            developer_mode: state.developer_mode.value(),
+        }
+    }
+}
+
+pub struct ModelCache {
+    pub current_select_setting_index: usize,
+}
+
 pub struct Model {
     pub phone_books: Vec<PhoneBook>,
-    pub settings: Settings,
+    pub settings: SettingsState,
+    pub cache: ModelCache,
 }
 
 impl Model {
     pub fn new() -> Model {
         Model {
             phone_books: vec![],
-            settings: Settings::new(),
+            settings: SettingsState::default(),
+            cache: ModelCache {
+                current_select_setting_index: 0,
+            },
         }
     }
 
@@ -214,7 +353,10 @@ impl Model {
                     },
                 ],
             }],
-            settings: Settings::new(),
+            settings: SettingsState::default(),
+            cache: ModelCache {
+                current_select_setting_index: 0,
+            },
         }
     }
 }

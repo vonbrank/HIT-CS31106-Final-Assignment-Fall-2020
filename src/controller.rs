@@ -34,12 +34,24 @@ impl Controller {
             Action::Navigate(page_type) => {
                 self.current_page_type = page_type;
             }
+            Action::UpdateSettings(settings_state, current_select_index) => {
+                self.model.settings = settings_state;
+                self.page_cache.remove(&PageType::Settings);
+                self.model.cache.current_select_setting_index = current_select_index;
+            }
             Action::Exit => match self.current_page_type {
                 PageType::HomeEntry => update_result = UpdateResult::Exit,
                 PageType::PhoneBookList
                 | PageType::PhoneBook(_)
                 | PageType::NewPhoneBook
-                | PageType::Settings => self.current_page_type = PageType::HomeEntry,
+                | PageType::Settings => {
+                    if self.current_page_type == PageType::Settings {
+                        self.page_cache.remove(&PageType::Settings);
+                        self.model.cache.current_select_setting_index = 0;
+                    }
+
+                    self.current_page_type = PageType::HomeEntry
+                }
                 _ => {}
             },
             _ => {}

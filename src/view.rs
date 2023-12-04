@@ -3,11 +3,11 @@ pub mod home_entry;
 mod phone_book_list;
 mod settings;
 
-use std::usize;
+use std::{fmt::Debug, usize};
 
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 
-use crate::model::Model;
+use crate::model::{Model, SettingsState};
 
 use self::{
     contact_list::ContactListPage,
@@ -57,7 +57,10 @@ impl PageType {
                     ContactListPage::new(phone_book_name.clone(), phone_book.contacts.clone());
                 Box::new(contact_list_page)
             }
-            PageType::Settings => Box::new(SettingsPage::new(model.settings.clone())),
+            PageType::Settings => Box::new(SettingsPage::new(
+                model.settings.clone(),
+                model.cache.current_select_setting_index,
+            )),
             _ => Box::new(EmptyPage {}),
         }
     }
@@ -125,6 +128,7 @@ impl PageContent {
 pub enum Action {
     // HomeEntry(HomeEntryAction),
     Navigate(PageType),
+    UpdateSettings(SettingsState, usize),
     Exit,
     None,
 }
@@ -144,7 +148,7 @@ impl PageTrait for EmptyPage {
     fn render(&self) {}
 }
 
-fn handle_list_scroll<T>(
+fn handle_vertical_scroll<T>(
     key_event: KeyEvent,
     target_list: &Vec<T>,
     seleced_index: &mut usize,
@@ -168,6 +172,50 @@ fn handle_list_scroll<T>(
             }
             KeyEvent {
                 code: KeyCode::Down,
+                ..
+            } => {
+                if *seleced_index >= target_list.len() - 1 {
+                    *seleced_index = 0;
+                } else {
+                    *seleced_index += 1;
+                }
+                res = true;
+            }
+            _ => {}
+        },
+        _ => {}
+    }
+
+    res
+}
+
+fn handle_horizontal_scroll<T: Debug>(
+    key_event: KeyEvent,
+    target_list: &Vec<T>,
+    seleced_index: &mut usize,
+) -> bool {
+    let mut res = false;
+
+    // println!("target: {:?}, index_before {}", target_list, seleced_index);
+
+    match key_event {
+        KeyEvent {
+            kind: KeyEventKind::Press,
+            ..
+        } => match key_event {
+            KeyEvent {
+                code: KeyCode::Left,
+                ..
+            } => {
+                if *seleced_index <= 0 {
+                    *seleced_index = target_list.len() - 1;
+                } else {
+                    *seleced_index -= 1;
+                }
+                res = true;
+            }
+            KeyEvent {
+                code: KeyCode::Right,
                 ..
             } => {
                 if *seleced_index >= target_list.len() - 1 {
