@@ -31,13 +31,14 @@ impl Controller {
         let action = self.handle_input().await;
 
         match action {
-            Action::HomeEntry(home_entry_action) => match home_entry_action {
-                HomeEntryAction::LoadPhoneBooks => self.current_page_type = PageType::PhoneBookList,
-                _ => {}
-            },
+            Action::Navigate(page_type) => {
+                self.current_page_type = page_type;
+            }
             Action::Exit => match self.current_page_type {
                 PageType::HomeEntry => update_result = UpdateResult::Exit,
-                PageType::PhoneBookList => self.current_page_type = PageType::HomeEntry,
+                PageType::PhoneBookList | PageType::PhoneBook(_) | PageType::NewPhoneBook => {
+                    self.current_page_type = PageType::HomeEntry
+                }
                 _ => {}
             },
             _ => {}
@@ -59,6 +60,8 @@ impl Controller {
 
     pub async fn render(&mut self) {
         print!("\x1B[2J\x1B[1;1H");
+
+        // println!("fuck");
 
         let current_page_view = self.page_cache.get(&self.current_page_type);
         if let Some(page_view) = current_page_view {

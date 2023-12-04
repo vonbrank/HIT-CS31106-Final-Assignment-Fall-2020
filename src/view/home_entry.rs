@@ -73,7 +73,20 @@ impl PageTrait for HomeEntry {
                             .get(self.current_select_index)
                             .unwrap()
                             .1;
-                        action = Action::HomeEntry(home_entry_action);
+                        action = match home_entry_action {
+                            // HomeEntryAction::NewPhoneBook => {
+                            //     Action::Navigate(super::PageType::NewPhoneBook)
+                            // }
+                            HomeEntryAction::LoadPhoneBooks => {
+                                Action::Navigate(super::PageType::PhoneBookList)
+                            }
+                            // HomeEntryAction::Settings => {
+                            //     Action::Navigate(super::PageType::Settings)
+                            // }
+                            // HomeEntryAction::About => Action::Navigate(super::PageType::About),
+                            HomeEntryAction::Exit => Action::Exit,
+                            _ => Action::None,
+                        }
                     }
                     KeyEvent {
                         code: KeyCode::Esc, ..

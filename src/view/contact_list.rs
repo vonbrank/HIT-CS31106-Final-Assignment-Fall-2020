@@ -1,19 +1,23 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 
+use crate::model::Contact;
+
 use super::{handle_list_scroll, Action, PageContent, PageTrait};
 
-pub struct PhoneBookListPage {
+pub struct ContactListPage {
     page_content: PageContent,
     current_select_index: usize,
-    phone_book_name_list: Vec<String>,
+    contact_list: Vec<Contact>,
+    phone_book_name: String,
 }
 
-impl PhoneBookListPage {
-    pub fn new(phone_book_list: Vec<String>) -> PhoneBookListPage {
-        let mut phone_book_list_page = PhoneBookListPage {
+impl ContactListPage {
+    pub fn new(phone_book_name: String, contact_list: Vec<Contact>) -> ContactListPage {
+        let mut phone_book_list_page = ContactListPage {
             page_content: PageContent::new(),
             current_select_index: 0,
-            phone_book_name_list: phone_book_list,
+            contact_list,
+            phone_book_name,
         };
 
         phone_book_list_page.refresh_content();
@@ -23,20 +27,23 @@ impl PhoneBookListPage {
 
     fn refresh_content(&mut self) {
         self.page_content = PageContent::from_list(
-            "Phone Book List".to_string(),
-            self.phone_book_name_list.clone(),
+            format!("Phone Book - {}", self.phone_book_name),
+            self.contact_list
+                .iter()
+                .map(|item| item.name.clone())
+                .collect(),
             self.current_select_index,
         );
     }
 }
 
-impl PageTrait for PhoneBookListPage {
+impl PageTrait for ContactListPage {
     fn handle_input(&mut self, key_event: KeyEvent) -> Action {
         let mut action = Action::None;
 
         if handle_list_scroll(
             key_event,
-            &self.phone_book_name_list,
+            &self.contact_list,
             &mut self.current_select_index,
         ) {
             self.refresh_content();
@@ -46,18 +53,6 @@ impl PageTrait for PhoneBookListPage {
                     kind: KeyEventKind::Press,
                     ..
                 } => match key_event {
-                    KeyEvent {
-                        code: KeyCode::Enter,
-                        ..
-                    } => {
-                        let current_phone_book_name = self
-                            .phone_book_name_list
-                            .get(self.current_select_index)
-                            .unwrap();
-                        action = Action::Navigate(super::PageType::PhoneBook(
-                            current_phone_book_name.clone(),
-                        ))
-                    }
                     KeyEvent {
                         code: KeyCode::Esc, ..
                     } => {

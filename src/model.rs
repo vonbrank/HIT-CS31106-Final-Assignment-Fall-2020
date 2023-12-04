@@ -1,6 +1,6 @@
 #[derive(Clone)]
 pub struct Contact {
-    name: String,
+    pub name: String,
     phone_number: String,
 }
 

@@ -1,3 +1,4 @@
+mod contact_list;
 pub mod home_entry;
 mod phone_book_list;
 
@@ -8,6 +9,7 @@ use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 use crate::model::Model;
 
 use self::{
+    contact_list::ContactListPage,
     home_entry::{HomeEntry, HomeEntryAction},
     phone_book_list::PhoneBookListPage,
 };
@@ -42,6 +44,16 @@ impl PageType {
                     .collect();
                 let phone_book_list_page = PhoneBookListPage::new(phone_book_list);
                 Box::new(phone_book_list_page)
+            }
+            PageType::PhoneBook(phone_book_name) => {
+                let phone_book = model
+                    .phone_books
+                    .iter()
+                    .find(|item| item.name.eq(phone_book_name))
+                    .unwrap();
+                let contact_list_page =
+                    ContactListPage::new(phone_book_name.clone(), phone_book.contacts.clone());
+                Box::new(contact_list_page)
             }
             _ => Box::new(EmptyPage {}),
         }
@@ -108,7 +120,8 @@ impl PageContent {
 }
 
 pub enum Action {
-    HomeEntry(HomeEntryAction),
+    // HomeEntry(HomeEntryAction),
+    Navigate(PageType),
     Exit,
     None,
 }
