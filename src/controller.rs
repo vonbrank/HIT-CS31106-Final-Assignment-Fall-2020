@@ -5,7 +5,7 @@ use tokio::sync::mpsc::UnboundedReceiver;
 
 use crate::{
     model::Model,
-    view::{Action, HomeEntry, HomeEntryAction, PageTrait, PageType},
+    view::{home_entry::HomeEntryAction, Action, PageTrait, PageType},
 };
 
 pub struct Controller {
