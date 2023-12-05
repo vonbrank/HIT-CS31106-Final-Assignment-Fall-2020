@@ -54,6 +54,19 @@ impl PageTrait for ContactListPage {
                     ..
                 } => match key_event {
                     KeyEvent {
+                        code: KeyCode::Enter,
+                        ..
+                    } => {
+                        action = Action::Navigate(super::PageType::Contact(
+                            self.phone_book_name.clone(),
+                            self.contact_list
+                                .get(self.current_select_index)
+                                .unwrap()
+                                .name
+                                .clone(),
+                        ))
+                    }
+                    KeyEvent {
                         code: KeyCode::Esc, ..
                     } => {
                         action = Action::Exit;

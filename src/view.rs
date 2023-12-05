@@ -1,3 +1,4 @@
+mod contact_detail;
 mod contact_list;
 pub mod home_entry;
 mod phone_book_list;
@@ -10,6 +11,7 @@ use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 use crate::model::{Model, SettingsState};
 
 use self::{
+    contact_detail::ContactDetail,
     contact_list::ContactListPage,
     home_entry::{HomeEntry, HomeEntryAction},
     phone_book_list::PhoneBookListPage,
@@ -64,6 +66,22 @@ impl PageType {
                     Box::new(SettingsPage::new(model.settings.clone()))
                 }
             }
+            PageType::Contact(phone_book_name, contact_name) => {
+                let phone_book = model
+                    .phone_books
+                    .iter()
+                    .find(|item| item.name.eq(phone_book_name))
+                    .unwrap();
+                let contact = phone_book
+                    .contacts
+                    .iter()
+                    .find(|item| item.name.eq(contact_name))
+                    .unwrap();
+                Box::new(ContactDetail::new(
+                    phone_book_name.to_string(),
+                    contact.clone(),
+                ))
+            }
             _ => Box::new(EmptyPage {}),
         }
     }
@@ -93,6 +111,17 @@ impl PageContent {
         page_content.add_element(UiElement::TextList(list, selected_index));
         page_content
     }
+
+    pub fn from_lines(name: String, lines: Vec<String>) -> PageContent {
+        let mut page_content = PageContent::new();
+        page_content.add_element(UiElement::Text(name));
+        page_content.add_element(UiElement::Text("----------".to_string()));
+        for item in lines {
+            page_content.add_element(UiElement::Text(item));
+        }
+        page_content
+    }
+
     pub fn add_element(&mut self, element: UiElement) {
         self.ui_elements.push(element);
     }

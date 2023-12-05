@@ -5,7 +5,7 @@ use crate::view::settings::SettingsPageSaved;
 #[derive(Clone)]
 pub struct Contact {
     pub name: String,
-    phone_number: String,
+    pub phone_number: String,
 }
 
 #[derive(Clone)]
