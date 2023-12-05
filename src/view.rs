@@ -51,7 +51,13 @@ impl PageType {
     pub async fn create_page_from_model(&self, model: &Model) -> Box<dyn PageTrait> {
         match self {
             PageType::HomeEntry => self.create_page().await,
-            PageType::NewPhoneBook => Box::new(CreatePhoneBookPage::new()),
+            PageType::NewPhoneBook => Box::new(CreatePhoneBookPage::new(
+                model
+                    .phone_books
+                    .iter()
+                    .map(|item| item.name.clone())
+                    .collect(),
+            )),
             PageType::PhoneBookList => {
                 let phone_book_list: Vec<String> = model
                     .phone_books
@@ -95,7 +101,19 @@ impl PageType {
                 ))
             }
             PageType::NewContact(phone_book_name) => {
-                Box::new(CreateContactPage::new(phone_book_name.clone()))
+                let phone_book = model
+                    .phone_books
+                    .iter()
+                    .find(|item| item.name.eq(phone_book_name))
+                    .unwrap();
+                Box::new(CreateContactPage::new(
+                    phone_book_name.clone(),
+                    phone_book
+                        .contacts
+                        .iter()
+                        .map(|item| item.name.clone())
+                        .collect(),
+                ))
             }
             _ => Box::new(EmptyPage {}),
         }
