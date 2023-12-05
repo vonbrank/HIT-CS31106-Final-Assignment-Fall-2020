@@ -189,7 +189,9 @@ impl PageContent {
                         if index == *select_index {
                             println!(
                                 "|{}|",
-                                align_string(item, self.inner_width, *align_type).on_white()
+                                align_string(item, self.inner_width, *align_type)
+                                    .black()
+                                    .on_white()
                             );
                         } else {
                             println!("|{}|", align_string(item, self.inner_width, *align_type));
@@ -202,6 +204,7 @@ impl PageContent {
                             println!(
                                 "|{}|",
                                 align_key_value(key, value, self.inner_width, *align_type)
+                                    .black()
                                     .on_white()
                             );
                         } else {
