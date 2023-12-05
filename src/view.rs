@@ -1,5 +1,6 @@
 mod contact_detail;
 mod contact_list;
+mod create_phone_book;
 pub mod home_entry;
 mod phone_book_list;
 pub mod settings;
@@ -13,6 +14,7 @@ use crate::model::{Model, SettingsState};
 use self::{
     contact_detail::ContactDetail,
     contact_list::ContactListPage,
+    create_phone_book::CreatePhoneBookPage,
     home_entry::{HomeEntry, HomeEntryAction},
     phone_book_list::PhoneBookListPage,
     settings::{SettingsPage, SettingsPageSaved},
@@ -40,6 +42,7 @@ impl PageType {
     pub async fn create_page_from_model(&self, model: &Model) -> Box<dyn PageTrait> {
         match self {
             PageType::HomeEntry => self.create_page().await,
+            PageType::NewPhoneBook => Box::new(CreatePhoneBookPage::new()),
             PageType::PhoneBookList => {
                 let phone_book_list: Vec<String> = model
                     .phone_books
@@ -161,6 +164,7 @@ pub enum Action {
     // HomeEntry(HomeEntryAction),
     Navigate(PageType),
     UpdateSettings(SettingsState, SettingsPageSaved),
+    CreateNewPhoneBook(String),
     Exit,
     None,
 }
@@ -185,6 +189,9 @@ fn handle_vertical_scroll<T>(
     target_list: &Vec<T>,
     seleced_index: &mut usize,
 ) -> bool {
+    if target_list.len() <= 0 {
+        return false;
+    }
     let mut res = false;
 
     match key_event {
@@ -226,8 +233,11 @@ fn handle_horizontal_scroll<T: Debug>(
     target_list: &Vec<T>,
     seleced_index: &mut usize,
 ) -> bool {
-    let mut res = false;
+    if target_list.len() <= 0 {
+        return false;
+    }
 
+    let mut res = false;
     // println!("target: {:?}, index_before {}", target_list, seleced_index);
 
     match key_event {

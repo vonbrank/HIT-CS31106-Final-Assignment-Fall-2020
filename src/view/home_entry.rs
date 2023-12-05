@@ -74,9 +74,9 @@ impl PageTrait for HomeEntry {
                             .unwrap()
                             .1;
                         action = match home_entry_action {
-                            // HomeEntryAction::NewPhoneBook => {
-                            //     Action::Navigate(super::PageType::NewPhoneBook)
-                            // }
+                            HomeEntryAction::NewPhoneBook => {
+                                Action::Navigate(super::PageType::NewPhoneBook)
+                            }
                             HomeEntryAction::LoadPhoneBooks => {
                                 Action::Navigate(super::PageType::PhoneBookList)
                             }

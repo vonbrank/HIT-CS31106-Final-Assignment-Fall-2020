@@ -4,7 +4,7 @@ use crossterm::event::KeyEvent;
 use tokio::sync::mpsc::UnboundedReceiver;
 
 use crate::{
-    model::Model,
+    model::{Model, PhoneBook},
     view::{home_entry::HomeEntryAction, Action, PageTrait, PageType},
 };
 
@@ -38,6 +38,15 @@ impl Controller {
                 self.model.settings = settings_state;
                 self.page_cache.remove(&PageType::Settings);
                 self.model.persist.settings_page = Some(saved);
+            }
+            Action::CreateNewPhoneBook(new_phone_book_name) => {
+                self.model.phone_books.push(PhoneBook {
+                    name: new_phone_book_name.clone(),
+                    contacts: vec![],
+                });
+                self.page_cache.remove(&PageType::PhoneBookList);
+                self.page_cache.remove(&PageType::NewPhoneBook);
+                self.current_page_type = PageType::PhoneBook(new_phone_book_name)
             }
             Action::Exit => match self.current_page_type {
                 PageType::HomeEntry => update_result = UpdateResult::Exit,
