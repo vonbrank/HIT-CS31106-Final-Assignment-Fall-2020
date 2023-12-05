@@ -34,10 +34,10 @@ impl Controller {
             Action::Navigate(page_type) => {
                 self.current_page_type = page_type;
             }
-            Action::UpdateSettings(settings_state, current_select_index) => {
+            Action::UpdateSettings(settings_state, saved) => {
                 self.model.settings = settings_state;
                 self.page_cache.remove(&PageType::Settings);
-                self.model.cache.current_select_setting_index = current_select_index;
+                self.model.persist.settings_page = Some(saved);
             }
             Action::Exit => match self.current_page_type {
                 PageType::HomeEntry => update_result = UpdateResult::Exit,
@@ -47,7 +47,7 @@ impl Controller {
                 | PageType::Settings => {
                     if self.current_page_type == PageType::Settings {
                         self.page_cache.remove(&PageType::Settings);
-                        self.model.cache.current_select_setting_index = 0;
+                        self.model.persist.settings_page = None;
                     }
 
                     self.current_page_type = PageType::HomeEntry

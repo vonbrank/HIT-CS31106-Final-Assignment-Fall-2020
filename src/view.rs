@@ -1,7 +1,7 @@
 mod contact_list;
 pub mod home_entry;
 mod phone_book_list;
-mod settings;
+pub mod settings;
 
 use std::{fmt::Debug, usize};
 
@@ -13,7 +13,7 @@ use self::{
     contact_list::ContactListPage,
     home_entry::{HomeEntry, HomeEntryAction},
     phone_book_list::PhoneBookListPage,
-    settings::SettingsPage,
+    settings::{SettingsPage, SettingsPageSaved},
 };
 
 #[derive(PartialEq, Eq, Hash, Clone)]
@@ -57,10 +57,13 @@ impl PageType {
                     ContactListPage::new(phone_book_name.clone(), phone_book.contacts.clone());
                 Box::new(contact_list_page)
             }
-            PageType::Settings => Box::new(SettingsPage::new(
-                model.settings.clone(),
-                model.cache.current_select_setting_index,
-            )),
+            PageType::Settings => {
+                if let Some(saved) = model.persist.settings_page.clone() {
+                    Box::new(SettingsPage::restore(model.settings.clone(), saved))
+                } else {
+                    Box::new(SettingsPage::new(model.settings.clone()))
+                }
+            }
             _ => Box::new(EmptyPage {}),
         }
     }
@@ -128,7 +131,7 @@ impl PageContent {
 pub enum Action {
     // HomeEntry(HomeEntryAction),
     Navigate(PageType),
-    UpdateSettings(SettingsState, usize),
+    UpdateSettings(SettingsState, SettingsPageSaved),
     Exit,
     None,
 }

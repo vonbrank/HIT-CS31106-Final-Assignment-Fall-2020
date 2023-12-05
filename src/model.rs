@@ -1,5 +1,7 @@
 use std::fmt::{self, Display};
 
+use crate::view::settings::SettingsPageSaved;
+
 #[derive(Clone)]
 pub struct Contact {
     pub name: String,
@@ -317,14 +319,22 @@ impl SettingConfig {
     }
 }
 
-pub struct ModelCache {
-    pub current_select_setting_index: usize,
+pub struct ModelPersist {
+    pub settings_page: Option<SettingsPageSaved>,
+}
+
+impl ModelPersist {
+    pub fn new() -> ModelPersist {
+        ModelPersist {
+            settings_page: None,
+        }
+    }
 }
 
 pub struct Model {
     pub phone_books: Vec<PhoneBook>,
     pub settings: SettingsState,
-    pub cache: ModelCache,
+    pub persist: ModelPersist,
 }
 
 impl Model {
@@ -332,9 +342,7 @@ impl Model {
         Model {
             phone_books: vec![],
             settings: SettingsState::default(),
-            cache: ModelCache {
-                current_select_setting_index: 0,
-            },
+            persist: ModelPersist::new(),
         }
     }
 
@@ -354,9 +362,7 @@ impl Model {
                 ],
             }],
             settings: SettingsState::default(),
-            cache: ModelCache {
-                current_select_setting_index: 0,
-            },
+            persist: ModelPersist::new(),
         }
     }
 }

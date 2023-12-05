@@ -13,12 +13,30 @@ pub struct SettingsPage {
     string_item_state_entries: Vec<(String, usize, Vec<String>)>,
     settings: SettingsState,
 }
+#[derive(Clone)]
+pub struct SettingsPageSaved {
+    current_select_index: usize,
+}
 
 impl SettingsPage {
-    pub fn new(settings: SettingsState, current_select_index: usize) -> SettingsPage {
+    pub fn new(settings: SettingsState) -> SettingsPage {
         let mut settings_page = SettingsPage {
             page_content: PageContent::new(),
-            current_select_index: current_select_index,
+            current_select_index: 0,
+            setting_entries: settings.string_entries(),
+            string_item_state_entries: settings.string_item_state_entries(),
+            settings,
+        };
+
+        settings_page.refresh_content();
+
+        settings_page
+    }
+
+    pub fn restore(settings: SettingsState, saved: SettingsPageSaved) -> SettingsPage {
+        let mut settings_page = SettingsPage {
+            page_content: PageContent::new(),
+            current_select_index: saved.current_select_index,
             setting_entries: settings.string_entries(),
             string_item_state_entries: settings.string_item_state_entries(),
             settings,
@@ -38,6 +56,12 @@ impl SettingsPage {
             self.current_select_index,
         ));
         self.page_content = page_content;
+    }
+
+    fn saved(&self) -> SettingsPageSaved {
+        SettingsPageSaved {
+            current_select_index: self.current_select_index,
+        }
     }
 }
 
@@ -72,7 +96,7 @@ impl PageTrait for SettingsPage {
                     .clone(),
                 new_select_entry_index,
             );
-            action = Action::UpdateSettings(self.settings.clone(), self.current_select_index);
+            action = Action::UpdateSettings(self.settings.clone(), self.saved());
         } else {
             match key_event {
                 KeyEvent {
