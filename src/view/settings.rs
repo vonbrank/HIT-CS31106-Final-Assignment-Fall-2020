@@ -49,11 +49,15 @@ impl SettingsPage {
 
     fn refresh_content(&mut self) {
         let mut page_content = PageContent::new();
-        page_content.add_element(UiElement::Text("Settings".to_string()));
-        page_content.add_element(UiElement::Text("----------".to_string()));
+        page_content.add_element(UiElement::Text(
+            "Settings".to_string(),
+            super::AlignType::Left,
+        ));
+        page_content.add_element(UiElement::Text("-".repeat(128), super::AlignType::Left));
         page_content.add_element(UiElement::KeyValueList(
             self.setting_entries.clone(),
             self.current_select_index,
+            super::AlignType::Left,
         ));
         self.page_content = page_content;
     }

@@ -26,6 +26,7 @@ impl PhoneBookListPage {
             "Phone Book List".to_string(),
             self.phone_book_name_list.clone(),
             self.current_select_index,
+            super::AlignType::Left,
         );
     }
 }

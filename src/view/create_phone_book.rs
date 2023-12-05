@@ -24,6 +24,7 @@ impl CreatePhoneBookPage {
             "Create Phone Book".to_string(),
             vec!["Name: ".to_string(), self.input_name.clone()],
             1,
+            super::AlignType::Left
         );
     }
 }

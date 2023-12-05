@@ -44,6 +44,7 @@ impl HomeEntry {
                 .map(|item| item.0.clone())
                 .collect(),
             self.current_select_index,
+            super::AlignType::Center,
         );
     }
 }

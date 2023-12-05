@@ -8,9 +8,15 @@ pub mod settings;
 
 use std::{fmt::Debug, usize};
 
-use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
+use crossterm::{
+    event::{KeyCode, KeyEvent, KeyEventKind},
+    style::Stylize,
+};
 
-use crate::model::{Contact, Model, SettingsState};
+use crate::{
+    model::{Contact, Model, SettingsState},
+    utils::{align_key_value, align_string, AlignType},
+};
 
 use self::{
     contact_detail::ContactDetail,
@@ -97,36 +103,45 @@ impl PageType {
 }
 
 pub enum UiElement {
-    Text(String),
-    KeyValue((String, String)),
-    TextList(Vec<String>, usize),
-    KeyValueList(Vec<(String, String)>, usize),
+    Text(String, AlignType),
+    KeyValue((String, String), AlignType),
+    TextList(Vec<String>, usize, AlignType),
+    KeyValueList(Vec<(String, String)>, usize, AlignType),
 }
 
 pub struct PageContent {
     ui_elements: Vec<UiElement>,
+    inner_width: u32,
+    inner_height: u32,
 }
 
 impl PageContent {
     pub fn new() -> PageContent {
         PageContent {
             ui_elements: vec![],
+            inner_width: 34,
+            inner_height: 10,
         }
     }
-    pub fn from_list(name: String, list: Vec<String>, selected_index: usize) -> PageContent {
+    pub fn from_list(
+        name: String,
+        list: Vec<String>,
+        selected_index: usize,
+        align_type: AlignType,
+    ) -> PageContent {
         let mut page_content = PageContent::new();
-        page_content.add_element(UiElement::Text(name));
-        page_content.add_element(UiElement::Text("----------".to_string()));
-        page_content.add_element(UiElement::TextList(list, selected_index));
+        page_content.add_element(UiElement::Text(name, AlignType::Left));
+        page_content.add_element(UiElement::Text("-".repeat(128), align_type));
+        page_content.add_element(UiElement::TextList(list, selected_index, align_type));
         page_content
     }
 
-    pub fn from_lines(name: String, lines: Vec<String>) -> PageContent {
+    pub fn from_lines(name: String, lines: Vec<String>, align_type: AlignType) -> PageContent {
         let mut page_content = PageContent::new();
-        page_content.add_element(UiElement::Text(name));
-        page_content.add_element(UiElement::Text("----------".to_string()));
+        page_content.add_element(UiElement::Text(name, AlignType::Left));
+        page_content.add_element(UiElement::Text("-".repeat(128), align_type));
         for item in lines {
-            page_content.add_element(UiElement::Text(item));
+            page_content.add_element(UiElement::Text(item, align_type));
         }
         page_content
     }
@@ -135,34 +150,55 @@ impl PageContent {
         self.ui_elements.push(element);
     }
     pub fn render(&self) {
+        println!("+{}+", "-".repeat(self.inner_width as usize));
+
         for ui_element in self.ui_elements.iter() {
             match ui_element {
-                UiElement::Text(text) => {
-                    println!("{}", text);
+                UiElement::Text(text, align_type) => {
+                    println!("|{}|", align_string(text, self.inner_width, *align_type));
                 }
-                UiElement::KeyValue((key, value)) => {
-                    println!("{} {}", key, value);
+                UiElement::KeyValue((key, value), align_type) => {
+                    println!(
+                        "|{}|",
+                        align_key_value(key, value, self.inner_width, *align_type)
+                    );
                 }
-                UiElement::TextList(list, select_index) => {
+                UiElement::TextList(list, select_index, align_type) => {
                     for (index, item) in list.into_iter().enumerate() {
                         if index == *select_index {
-                            println!("\x1B[7m{}\x1B[0m", item);
+                            println!(
+                                "|{}|",
+                                align_string(item, self.inner_width, *align_type).on_white()
+                            );
                         } else {
-                            println!("{}", item);
+                            println!("|{}|", align_string(item, self.inner_width, *align_type));
                         }
                     }
                 }
-                UiElement::KeyValueList(entries, select_index) => {
+                UiElement::KeyValueList(entries, select_index, align_type) => {
                     for (index, (key, value)) in entries.into_iter().enumerate() {
                         if index == *select_index {
-                            println!("\x1B[7m{} {}\x1B[0m", key, value);
+                            println!(
+                                "|{}|",
+                                align_key_value(key, value, self.inner_width, *align_type)
+                                    .on_white()
+                            );
                         } else {
-                            println!("{} {}", key, value);
+                            println!(
+                                "|{}|",
+                                align_key_value(key, value, self.inner_width, *align_type)
+                            );
                         }
                     }
                 }
             }
         }
+
+        for _ in 0..(self.inner_height - self.ui_elements.len() as u32) {
+            println!("|{}|", " ".repeat(self.inner_width as usize));
+        }
+
+        println!("+{}+", "-".repeat(self.inner_width as usize));
     }
 }
 

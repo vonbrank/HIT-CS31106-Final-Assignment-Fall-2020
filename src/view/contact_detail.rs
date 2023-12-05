@@ -30,6 +30,7 @@ impl ContactDetail {
                 format!("Name: {}", self.data.name),
                 format!("Phone Number: {}", self.data.phone_number),
             ],
+            super::AlignType::Left,
         );
     }
 }

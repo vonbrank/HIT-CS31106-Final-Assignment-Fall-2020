@@ -97,8 +97,6 @@ impl Controller {
     pub async fn render(&mut self) {
         print!("\x1B[2J\x1B[1;1H");
 
-        // println!("fuck");
-
         let current_page_view = self.page_cache.get(&self.current_page_type);
         if let Some(page_view) = current_page_view {
             page_view.render();

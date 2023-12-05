@@ -45,6 +45,7 @@ impl CreateContactPage {
                 FocusType::Name => 1,
                 FocusType::PhoneNumber => 3,
             },
+            super::AlignType::Left,
         );
     }
 }

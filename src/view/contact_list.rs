@@ -30,6 +30,7 @@ impl ContactListPage {
             format!("Phone Book - {}", self.phone_book_name),
             self.get_string_list_with_add_new(),
             self.current_select_index,
+            super::AlignType::Left,
         );
     }
 
