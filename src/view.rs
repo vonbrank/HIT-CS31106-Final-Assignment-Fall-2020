@@ -1,5 +1,6 @@
 mod contact_detail;
 mod contact_list;
+mod create_contact;
 mod create_phone_book;
 pub mod home_entry;
 mod phone_book_list;
@@ -9,11 +10,12 @@ use std::{fmt::Debug, usize};
 
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 
-use crate::model::{Model, SettingsState};
+use crate::model::{Contact, Model, SettingsState};
 
 use self::{
     contact_detail::ContactDetail,
     contact_list::ContactListPage,
+    create_contact::CreateContactPage,
     create_phone_book::CreatePhoneBookPage,
     home_entry::{HomeEntry, HomeEntryAction},
     phone_book_list::PhoneBookListPage,
@@ -29,6 +31,7 @@ pub enum PageType {
     PhoneBookList,
     PhoneBook(String),
     Contact(String, String),
+    NewContact(String),
 }
 
 impl PageType {
@@ -84,6 +87,9 @@ impl PageType {
                     phone_book_name.to_string(),
                     contact.clone(),
                 ))
+            }
+            PageType::NewContact(phone_book_name) => {
+                Box::new(CreateContactPage::new(phone_book_name.clone()))
             }
             _ => Box::new(EmptyPage {}),
         }
@@ -165,6 +171,7 @@ pub enum Action {
     Navigate(PageType),
     UpdateSettings(SettingsState, SettingsPageSaved),
     CreateNewPhoneBook(String),
+    CreateNewContact(String, Contact),
     Exit,
     None,
 }

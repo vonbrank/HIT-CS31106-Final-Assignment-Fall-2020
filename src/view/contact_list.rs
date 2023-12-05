@@ -28,12 +28,19 @@ impl ContactListPage {
     fn refresh_content(&mut self) {
         self.page_content = PageContent::from_list(
             format!("Phone Book - {}", self.phone_book_name),
-            self.contact_list
-                .iter()
-                .map(|item| item.name.clone())
-                .collect(),
+            self.get_string_list_with_add_new(),
             self.current_select_index,
         );
+    }
+
+    fn get_string_list_with_add_new(&self) -> Vec<String> {
+        let mut contact_list_string: Vec<String> = self
+            .contact_list
+            .iter()
+            .map(|item| item.name.clone())
+            .collect();
+        contact_list_string.push("New Contact".to_string());
+        contact_list_string
     }
 }
 
@@ -43,7 +50,7 @@ impl PageTrait for ContactListPage {
 
         if handle_vertical_scroll(
             key_event,
-            &self.contact_list,
+            &self.get_string_list_with_add_new(),
             &mut self.current_select_index,
         ) {
             self.refresh_content();
@@ -57,14 +64,22 @@ impl PageTrait for ContactListPage {
                         code: KeyCode::Enter,
                         ..
                     } => {
-                        action = Action::Navigate(super::PageType::Contact(
-                            self.phone_book_name.clone(),
-                            self.contact_list
-                                .get(self.current_select_index)
-                                .unwrap()
-                                .name
-                                .clone(),
-                        ))
+                        if self.current_select_index
+                            == self.get_string_list_with_add_new().len() - 1
+                        {
+                            action = Action::Navigate(super::PageType::NewContact(
+                                self.phone_book_name.clone(),
+                            ))
+                        } else {
+                            action = Action::Navigate(super::PageType::Contact(
+                                self.phone_book_name.clone(),
+                                self.contact_list
+                                    .get(self.current_select_index)
+                                    .unwrap()
+                                    .name
+                                    .clone(),
+                            ))
+                        }
                     }
                     KeyEvent {
                         code: KeyCode::Esc, ..

@@ -46,7 +46,21 @@ impl Controller {
                 });
                 self.page_cache.remove(&PageType::PhoneBookList);
                 self.page_cache.remove(&PageType::NewPhoneBook);
-                self.current_page_type = PageType::PhoneBook(new_phone_book_name)
+                self.current_page_type = PageType::PhoneBook(new_phone_book_name);
+            }
+            Action::CreateNewContact(phone_book_name, contact) => {
+                let phone_book = self
+                    .model
+                    .phone_books
+                    .iter_mut()
+                    .find(|item| item.name.eq(&phone_book_name))
+                    .unwrap();
+                phone_book.contacts.push(contact);
+                self.page_cache
+                    .remove(&PageType::PhoneBook(phone_book_name.clone()));
+                self.page_cache
+                    .remove(&PageType::NewContact(phone_book_name.clone()));
+                self.current_page_type = PageType::PhoneBook(phone_book_name);
             }
             Action::Exit => match self.current_page_type {
                 PageType::HomeEntry => update_result = UpdateResult::Exit,
