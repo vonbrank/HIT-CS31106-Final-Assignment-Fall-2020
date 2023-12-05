@@ -84,7 +84,7 @@ impl PageTrait for HomeEntry {
                             HomeEntryAction::Settings => {
                                 Action::Navigate(super::PageType::Settings)
                             }
-                            // HomeEntryAction::About => Action::Navigate(super::PageType::About),
+                            HomeEntryAction::About => Action::Navigate(super::PageType::About),
                             HomeEntryAction::Exit => Action::Exit,
                             _ => Action::None,
                         }

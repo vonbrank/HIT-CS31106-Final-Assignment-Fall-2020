@@ -67,7 +67,8 @@ impl Controller {
                 PageType::PhoneBookList
                 | PageType::PhoneBook(_)
                 | PageType::NewPhoneBook
-                | PageType::Settings => {
+                | PageType::Settings
+                | PageType::About => {
                     if self.current_page_type == PageType::Settings {
                         self.page_cache.remove(&PageType::Settings);
                         self.model.persist.settings_page = None;

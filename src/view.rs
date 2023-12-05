@@ -1,3 +1,4 @@
+mod about;
 mod contact_detail;
 mod contact_list;
 mod create_contact;
@@ -19,6 +20,7 @@ use crate::{
 };
 
 use self::{
+    about::About,
     contact_detail::ContactDetail,
     contact_list::ContactListPage,
     create_contact::CreateContactPage,
@@ -115,6 +117,7 @@ impl PageType {
                         .collect(),
                 ))
             }
+            PageType::About => Box::new(About::new()),
             _ => Box::new(EmptyPage {}),
         }
     }
