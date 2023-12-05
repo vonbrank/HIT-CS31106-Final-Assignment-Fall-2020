@@ -28,7 +28,6 @@ impl App {
                     }
                 }
             }
-            println!("Receiver has been closed.");
         });
 
         self.controller = Some(Controller::new(rx));

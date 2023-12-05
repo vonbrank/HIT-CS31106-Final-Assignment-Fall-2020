@@ -113,6 +113,7 @@ impl Controller {
 
     pub fn close(&mut self) {
         self.receiver.close();
+        println!("Press any key to exit.");
     }
 }
 

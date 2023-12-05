@@ -130,7 +130,7 @@ impl PageContent {
         align_type: AlignType,
     ) -> PageContent {
         let mut page_content = PageContent::new();
-        page_content.add_element(UiElement::Text(name, AlignType::Left));
+        page_content.add_element(UiElement::Text(name, AlignType::Center));
         page_content.add_element(UiElement::Text("-".repeat(128), align_type));
         page_content.add_element(UiElement::TextList(list, selected_index, align_type));
         page_content
@@ -138,7 +138,7 @@ impl PageContent {
 
     pub fn from_lines(name: String, lines: Vec<String>, align_type: AlignType) -> PageContent {
         let mut page_content = PageContent::new();
-        page_content.add_element(UiElement::Text(name, AlignType::Left));
+        page_content.add_element(UiElement::Text(name, AlignType::Center));
         page_content.add_element(UiElement::Text("-".repeat(128), align_type));
         for item in lines {
             page_content.add_element(UiElement::Text(item, align_type));

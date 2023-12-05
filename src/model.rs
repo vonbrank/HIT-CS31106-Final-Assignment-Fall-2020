@@ -83,8 +83,8 @@ impl Display for LanguageOption {
             f,
             "{}",
             match self {
-                LanguageOption::Chinese => "中文".to_string(),
-                LanguageOption::English => "English".to_string(),
+                LanguageOption::Chinese => "zh-CN".to_string(),
+                LanguageOption::English => "en-US".to_string(),
             }
         )
     }

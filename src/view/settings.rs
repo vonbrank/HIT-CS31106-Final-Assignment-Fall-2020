@@ -51,7 +51,7 @@ impl SettingsPage {
         let mut page_content = PageContent::new();
         page_content.add_element(UiElement::Text(
             "Settings".to_string(),
-            super::AlignType::Left,
+            super::AlignType::Center,
         ));
         page_content.add_element(UiElement::Text("-".repeat(128), super::AlignType::Left));
         page_content.add_element(UiElement::KeyValueList(
