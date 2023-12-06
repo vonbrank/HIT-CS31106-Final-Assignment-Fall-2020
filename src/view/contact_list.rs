@@ -72,14 +72,13 @@ impl PageTrait for ContactListPage {
                                 self.phone_book_name.clone(),
                             ))
                         } else {
-                            action = Action::Navigate(super::PageType::Contact(
-                                self.phone_book_name.clone(),
-                                self.contact_list
-                                    .get(self.current_select_index)
-                                    .unwrap()
-                                    .name
-                                    .clone(),
-                            ))
+                            if let Some(contact) = self.contact_list.get(self.current_select_index)
+                            {
+                                action = Action::Navigate(super::PageType::Contact(
+                                    self.phone_book_name.clone(),
+                                    contact.name.clone(),
+                                ))
+                            }
                         }
                     }
                     KeyEvent {

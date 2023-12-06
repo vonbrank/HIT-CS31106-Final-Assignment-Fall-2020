@@ -51,13 +51,13 @@ impl PageTrait for PhoneBookListPage {
                         code: KeyCode::Enter,
                         ..
                     } => {
-                        let current_phone_book_name = self
-                            .phone_book_name_list
-                            .get(self.current_select_index)
-                            .unwrap();
-                        action = Action::Navigate(super::PageType::PhoneBook(
-                            current_phone_book_name.clone(),
-                        ))
+                        if let Some(current_phone_book_name) =
+                            self.phone_book_name_list.get(self.current_select_index)
+                        {
+                            action = Action::Navigate(super::PageType::PhoneBook(
+                                current_phone_book_name.clone(),
+                            ))
+                        }
                     }
                     KeyEvent {
                         code: KeyCode::Esc, ..

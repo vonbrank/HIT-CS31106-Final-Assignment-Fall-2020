@@ -1,27 +1,52 @@
 use std::collections::HashMap;
 
 use crossterm::event::KeyEvent;
-use tokio::sync::mpsc::UnboundedReceiver;
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 
 use crate::{
-    model::{Model, PhoneBook},
+    app::SavingData,
+    model::{Model, ModelPersist, PhoneBook, SettingsState},
     view::{home_entry::HomeEntryAction, Action, PageTrait, PageType},
 };
 
 pub struct Controller {
-    receiver: UnboundedReceiver<KeyEvent>,
+    keyboard_event_receiver: UnboundedReceiver<KeyEvent>,
     current_page_type: PageType,
     page_cache: HashMap<PageType, Box<dyn PageTrait>>,
     model: Model,
+    saving_data_sender: UnboundedSender<SavingData>,
 }
 
 impl Controller {
-    pub fn new(receiver: UnboundedReceiver<KeyEvent>) -> Controller {
+    pub fn new(
+        keyboard_event_receiver: UnboundedReceiver<KeyEvent>,
+        saving_data_sender: UnboundedSender<SavingData>,
+    ) -> Controller {
         Controller {
-            receiver,
+            keyboard_event_receiver,
+            saving_data_sender,
             current_page_type: PageType::HomeEntry,
             page_cache: HashMap::new(),
-            model: Model::from_fake_data(),
+            model: Model::new(),
+        }
+    }
+
+    pub fn from_saved_data(
+        keyboard_event_receiver: UnboundedReceiver<KeyEvent>,
+        saving_data_sender: UnboundedSender<SavingData>,
+        phone_books: Vec<PhoneBook>,
+        settings: SettingsState,
+    ) -> Controller {
+        Controller {
+            keyboard_event_receiver,
+            saving_data_sender,
+            current_page_type: PageType::HomeEntry,
+            page_cache: HashMap::new(),
+            model: Model {
+                phone_books,
+                settings,
+                persist: ModelPersist::new(),
+            },
         }
     }
 
@@ -36,6 +61,9 @@ impl Controller {
             }
             Action::UpdateSettings(settings_state, saved) => {
                 self.model.settings = settings_state;
+                let _ = self
+                    .saving_data_sender
+                    .send(SavingData::from_model(&self.model));
                 self.page_cache.remove(&PageType::Settings);
                 self.model.persist.settings_page = Some(saved);
             }
@@ -44,6 +72,9 @@ impl Controller {
                     name: new_phone_book_name.clone(),
                     contacts: vec![],
                 });
+                let _ = self
+                    .saving_data_sender
+                    .send(SavingData::from_model(&self.model));
                 self.page_cache.remove(&PageType::PhoneBookList);
                 self.page_cache.remove(&PageType::NewPhoneBook);
                 self.current_page_type = PageType::PhoneBook(new_phone_book_name);
@@ -56,6 +87,9 @@ impl Controller {
                     .find(|item| item.name.eq(&phone_book_name))
                     .unwrap();
                 phone_book.contacts.push(contact);
+                let _ = self
+                    .saving_data_sender
+                    .send(SavingData::from_model(&self.model));
                 self.page_cache
                     .remove(&PageType::PhoneBook(phone_book_name.clone()));
                 self.page_cache
@@ -87,7 +121,7 @@ impl Controller {
     }
 
     async fn handle_input(&mut self) -> Action {
-        if let Some(key_event) = self.receiver.recv().await {
+        if let Some(key_event) = self.keyboard_event_receiver.recv().await {
             let current_page_view = self.page_cache.get_mut(&self.current_page_type).unwrap();
             current_page_view.handle_input(key_event)
         } else {
@@ -113,7 +147,7 @@ impl Controller {
     }
 
     pub fn close(&mut self) {
-        self.receiver.close();
+        self.keyboard_event_receiver.close();
         println!("Press any key to exit.");
     }
 }

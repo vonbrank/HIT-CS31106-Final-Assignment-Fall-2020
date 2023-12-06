@@ -1,19 +1,21 @@
 use std::fmt::{self, Display};
 
+use serde::{Deserialize, Serialize};
+
 use crate::view::settings::SettingsPageSaved;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Contact {
     pub name: String,
     pub phone_number: String,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct PhoneBook {
     pub name: String,
     pub contacts: Vec<Contact>,
 }
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum ResolutionOption {
     _40_10,
     _60_15,
@@ -33,7 +35,7 @@ impl Display for ResolutionOption {
         )
     }
 }
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum RefreshRateOption {
     _15,
     _30,
@@ -53,7 +55,7 @@ impl Display for RefreshRateOption {
         )
     }
 }
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum VSyncOption {
     ON,
     OFF,
@@ -71,7 +73,7 @@ impl Display for VSyncOption {
         )
     }
 }
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum LanguageOption {
     Chinese,
     English,
@@ -89,7 +91,7 @@ impl Display for LanguageOption {
         )
     }
 }
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum DeveloperModeOption {
     ON,
     OFF,
@@ -115,7 +117,7 @@ impl Display for DeveloperModeOption {
 //     Language(String, i32),
 //     DeveloperMode(String, i32),
 // }
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 struct SettingItemState<T: Display + Clone> {
     name: String,
     current_selected_item_index: usize,
@@ -152,7 +154,7 @@ impl<T: Display + Clone> SettingItemState<T> {
     // }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct SettingsState {
     resolution: SettingItemState<ResolutionOption>,
     refresh_rate: SettingItemState<RefreshRateOption>,
