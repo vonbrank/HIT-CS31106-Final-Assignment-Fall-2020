@@ -173,16 +173,20 @@ impl PageContent {
     pub fn render(&self) {
         println!("+{}+", "-".repeat(self.inner_width as usize));
 
+        let mut line_number = 0;
+
         for ui_element in self.ui_elements.iter() {
             match ui_element {
                 UiElement::Text(text, align_type) => {
                     println!("|{}|", align_string(text, self.inner_width, *align_type));
+                    line_number += 1;
                 }
                 UiElement::KeyValue((key, value), align_type) => {
                     println!(
                         "|{}|",
                         align_key_value(key, value, self.inner_width, *align_type)
                     );
+                    line_number += 1;
                 }
                 UiElement::TextList(list, select_index, align_type) => {
                     for (index, item) in list.into_iter().enumerate() {
@@ -196,6 +200,7 @@ impl PageContent {
                         } else {
                             println!("|{}|", align_string(item, self.inner_width, *align_type));
                         }
+                        line_number += 1;
                     }
                 }
                 UiElement::KeyValueList(entries, select_index, align_type) => {
@@ -213,12 +218,13 @@ impl PageContent {
                                 align_key_value(key, value, self.inner_width, *align_type)
                             );
                         }
+                        line_number += 1;
                     }
                 }
             }
         }
 
-        for _ in 0..(self.inner_height - self.ui_elements.len() as u32) {
+        for _ in 0..(self.inner_height - line_number as u32) {
             println!("|{}|", " ".repeat(self.inner_width as usize));
         }
 

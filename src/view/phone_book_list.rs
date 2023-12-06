@@ -22,12 +22,25 @@ impl PhoneBookListPage {
     }
 
     fn refresh_content(&mut self) {
-        self.page_content = PageContent::from_list(
-            "Phone Book List".to_string(),
-            self.phone_book_name_list.clone(),
-            self.current_select_index,
-            super::AlignType::Left,
-        );
+        let page_content = if self.phone_book_name_list.is_empty() {
+            PageContent::from_lines(
+                "Phone Book List".to_string(),
+                vec![
+                    "There is no phone books.".to_string(),
+                    "Go back to create a new one.".to_string(),
+                ],
+                super::AlignType::Left,
+            )
+        } else {
+            PageContent::from_list(
+                "Phone Book List".to_string(),
+                self.phone_book_name_list.clone(),
+                self.current_select_index,
+                super::AlignType::Left,
+            )
+        };
+
+        self.page_content = page_content;
     }
 }
 
