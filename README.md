@@ -4,7 +4,7 @@
 
 **Contactify** 是一款控制台通讯录小程序，是哈工大2020秋《高级语言程序设计》课程大作业的重构版本。
 
-旧版本使用 C++ 编写，架构较为混乱；现使用 Rust 进行重构，采用 MVC 架构模式。
+[旧版本](https://github.com/vonbrank/HIT-CS31106-Final-Assignment-Fall-2020/tree/legacy-cpp-version) 使用 C++ 编写，架构较为混乱；现使用 Rust 进行重构，采用 MVC 架构模式。
 
 ![MVC Architecture](https://s1.ax1x.com/2023/04/07/ppT9A61.png)
 
