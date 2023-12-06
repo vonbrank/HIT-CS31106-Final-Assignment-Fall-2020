@@ -22,4 +22,10 @@
 - 列表渲染与选中项目高亮
 - 页面切换与状态缓存
 
-![](https://vonbrank-images.oss-cn-hangzhou.aliyuncs.com/20231206-Contactify/contactify-demo.gif)
+![Contactify Demo](https://vonbrank-images.oss-cn-hangzhou.aliyuncs.com/20231206-Contactify/contactify-demo.gif)
+
+键位映射：
+- `↑` `↓` 切换列表选中条目
+- `←` `→` 更改条目的值（如果条目是 key-value 形式的话）
+- `Enter` 进入选中条目/确认表单
+- `Esc` 退出当前页面
